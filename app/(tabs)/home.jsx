@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image, TouchableOpacity, Text, Touchable, View } from "react-native";
+import { Link, router } from "expo-router";
+import { Image, Text, Touchable, View } from "react-native";
 
 import { images } from "../../constants";
 import useAppwrite from "../../lib/useAppwrite";
-import { getAllPosts, getLatestPosts } from "../../lib/appwrite";
+import { getAllPosts, getLatestPosts, getCurrentUser } from "../../lib/appwrite";
 import { EmptyState, SearchInput, Trending, VideoCard } from "../../components";
 
 const Home = () => {
@@ -19,6 +20,8 @@ const Home = () => {
     setRefreshing(false);
   };
 
+  const { data: user, isLoading: trainingsLoading } = useAppwrite(getCurrentUser);
+
   return (
     <SafeAreaView className="bg-white h-full">
           <View className="flex my-6 px-4 space-y-1">
@@ -28,7 +31,7 @@ const Home = () => {
                   Физкульты,
                 </Text>
                 <Text className="text-2xl font-psemibold text-black">
-                  Никита
+                  {user?.name}
                 </Text>
               </View>
 
@@ -41,9 +44,12 @@ const Home = () => {
               </View>
             </View>
 
-            <TouchableOpacity className="bg-[#f43ee8] h-[100px] rounded-3xl flex justify-center">
-            <Text className="font-psemibold text-xl text-white text-center ">Создать тренировку</Text>
-            </TouchableOpacity>
+
+            <Text className="text-2xl font-pbold">Тренировки</Text>
+            <Text className="text-lg text-[#676767]">На сегодня планов пока нет :({"\n"}
+              <Link href="/trainings"className="text-lg font-psemibold text-primary">Примите участие</Link> или <Link href="/create"className="text-lg font-psemibold text-primary">создайте свою</Link>.
+            </Text>
+              
             </View>
     </SafeAreaView>
   );

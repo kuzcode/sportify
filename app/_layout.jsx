@@ -10,15 +10,15 @@ SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
   const [fontsLoaded, error] = useFonts({
-    "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
-    "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
-    "Poppins-ExtraBold": require("../assets/fonts/Poppins-ExtraBold.ttf"),
-    "Poppins-ExtraLight": require("../assets/fonts/Poppins-ExtraLight.ttf"),
-    "Poppins-Light": require("../assets/fonts/Poppins-Light.ttf"),
-    "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
-    "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
-    "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
-    "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
+    "Poppins-Black": require("../assets/fonts/bold.otf"),
+    "Poppins-Bold": require("../assets/fonts/bold.otf"),
+    "Poppins-ExtraBold": require("../assets/fonts/bold.otf"),
+    "Poppins-ExtraLight": require("../assets/fonts/regular.otf"),
+    "Poppins-Light": require("../assets/fonts/regular.otf"),
+    "Poppins-Medium": require("../assets/fonts/medium.otf"),
+    "Poppins-Regular": require("../assets/fonts/regular.otf"),
+    "Poppins-SemiBold": require("../assets/fonts/bold.otf"),
+    "Poppins-Thin": require("../assets/fonts/regular.otf"),
   });
 
   useEffect(() => {

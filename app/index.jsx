@@ -36,7 +36,7 @@ const Welcome = () => {
 
           <View className="relative mt-5">
             <Text className="text-3xl font-bold text-center">
-              <Text className="text-secondary-200">Клуб</Text> - ваш спорт в Беларуси
+              <Text className="text-primary">Клуб</Text> - ваш спорт в Беларуси
             </Text>
           </View>
 

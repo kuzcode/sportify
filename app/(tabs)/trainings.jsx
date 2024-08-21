@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image, TouchableOpacity, Text, ScrollView, View } from "react-native";
+import { View, Image, TouchableOpacity, Text, ScrollView, Animated, StyleSheet, Dimensions, } from "react-native";
 
 import { sporticons } from "../../constants";
 import useAppwrite from "../../lib/useAppwrite";
 import { getTrainingsForYou, getCurrentUser } from "../../lib/appwrite";
+import { Svg } from "react-native-svg";
 
 const Train = () => {
   const { data: trainings } = useAppwrite(() => getTrainingsForYou(['0', '1']));
@@ -56,24 +57,47 @@ const Train = () => {
     }
     )  
 
+    const { height } = Dimensions.get('window');
+    
+  const [visible, setVisible] = useState(false);
+  const slideAnimation = useRef(new Animated.Value(height)).current;
+
+    const showNotification = () => {
+      setVisible(true);
+      Animated.timing(slideAnimation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    };
+  
+    const hideNotification = () => {
+      Animated.timing(slideAnimation, {
+        toValue: height,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setVisible(false));
+    };
+
   const filteredTrainings = current.key === 'all' 
   ? trainings
   : trainings.filter(train => train.kind === current.key)
 
   return (
     <SafeAreaView className="bg-white h-full">
-      <Text className="font-pbold text-[27px] mx-4 mt-2">Тренировки</Text>
+      <Text className="font-pbold text-[27px] mx-4 mt-3 mb-3">Тренировки</Text>
     <View>
     <ScrollView horizontal={true} className="flex px-3">
         {updatedSports.map(type =>
-          <TouchableOpacity className="flex rounded-xl py-1 px-4 mx-1"
+          <TouchableOpacity className="flex rounded-xl pt-1 pb-2 px-4 mx-1"
+          key={type.key}
           onPress={() => {setCurrent({title: type.title, key: type.key})}}
           activeOpacity={0.9}
           style={{
             backgroundColor: current.key == type.key ?  '#30d158' : '#f3f3f3',
           }}
           > 
-            <Text className="flex text-[16px] font-psemibold"
+            <Text className="flex text-[16px] font-pmedium"
             style={{
               color: current.key == type.key ?  '#fff' : '#676767',
             }}
@@ -85,11 +109,13 @@ const Train = () => {
 
     <TouchableOpacity className="bg-[#f3f3f3] mx-4 mt-4 h-[120px] rounded-3xl flex justify-center"
     activeOpacity={0.85}
+    onPress={showNotification}
     >
-        <Text className="font-psemibold text-lg text-[#000] text-center">Создать свою +</Text>
+        <Text className="font-psemibold text-lg text-[#333] text-center">Создать свою +</Text>
     </TouchableOpacity>
 
-    <Text className="font-pbold text-[27px] mx-4 mt-2">Примите участие</Text>
+
+    <Text className="font-pbold text-[27px] mx-4 mt-2 mb-3">Примите участие</Text>
     
 
   {filteredTrainings.length == 0 ? (
@@ -120,11 +146,11 @@ const Train = () => {
     const formattedIcon = iconstypes[Number(train.kind)];
 
     return (
-      <View key={train.id} className="mx-4 h-[120px] bg-[#f3f3f3] px-4 py-2 rounded-2xl overflow-hidden mb-4">
-        <Text className="font-pbold text-xl">{train.title}</Text>
+      <View key={train.id} className="mx-4 h-[120px] bg-[#f7f7f7] px-4 py-2 rounded-2xl overflow-hidden mb-4">
+        <Text className="font-pbold text-xl text-[#333]">{train.title}</Text>
         <Text className="font-pregular text-xl text-[#676767]">{formattedDate}</Text>
         <Text className="font-pregular text-xl text-[#676767]">{formattedType}</Text>
-        <Image
+        <Svg
           source={sporticons[formattedIcon]}
           className="absolute right-[-5px] top-[-5px] w-[130px] h-[130px] overflow-hidden"
         />
@@ -132,6 +158,18 @@ const Train = () => {
     );
 })
 )}
+
+
+{visible && (
+        <Animated.View className="absolute w-full bg-white h-[100vh] py-[36px] px-4" style={[{ transform: [{ translateY: slideAnimation }] }]}>
+          <Text className="font-pbold text-2xl">Создайте своместную тренировку</Text>
+          <Text className="font-psemibold text-xl text-[#333]">Вид спорта</Text>
+          
+          <TouchableOpacity onPress={hideNotification} className="">
+            <Text className="mt-[70vh] text-center">Закрыть</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
 </SafeAreaView>
   );
 };

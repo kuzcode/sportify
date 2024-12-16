@@ -1,44 +1,54 @@
 {
   "expo": {
-    "name": "sora",
-    "slug": "sora",
-    "version": "1.0.0",
+    "name": "атлет",
+    "slug": "athlete",
+    "version": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "cover",
+      "backgroundColor": "#3c87ff"
     },
-    "scheme": "sora",
+    "scheme": "Athlete",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "athlete.com"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#111"
       },
-      "package": "com.jsm.sora"
+      "package": "athlete.com"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-location",
+      "expo-font",
+      "expo-av"
     ],
     "extra": {
       "router": {
         "origin": false
       },
       "eas": {
-        "projectId": "648d23ed-d8b0-494b-8df0-4420d8d8fdff"
+        "projectId": "dc346ca7-4762-445a-8d07-9693d277c1b5"
       }
-    }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/648d23ed-d8b0-494b-8df0-4420d8d8fdff"
+    },
+    "owner": "kuzmin"
   }
 }

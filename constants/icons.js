@@ -8,15 +8,21 @@ import search from "../assets/icons/search.png";
 import upload from "../assets/icons/upload.png";
 import rightArrow from "../assets/icons/right-arrow.png";
 import logout from "../assets/icons/logout.png";
+import settings from "../assets/icons/settings.png";
 import eyeHide from "../assets/icons/eye-hide.png";
 import eye from "../assets/icons/eye.png";
+import neww from "../assets/icons/new.png";
 import play from "../assets/icons/play.png";
+import right from "../assets/icons/right.png";
 
 export default {
   play,
+  right,
   bookmark,
   home,
+  neww,
   plus,
+  settings,
   profile,
   leftArrow,
   menu,

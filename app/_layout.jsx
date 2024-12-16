@@ -1,24 +1,19 @@
 import { useEffect } from "react";
-import { useFonts } from "expo-font";
-import "react-native-url-polyfill/auto";
-import { SplashScreen, Stack } from "expo-router";
-
+import { useFonts } from 'expo-font';
+import { Stack } from "expo-router";
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'react-native';
 import GlobalProvider from "../context/GlobalProvider";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+StatusBar.setHidden(true);
 
 const RootLayout = () => {
   const [fontsLoaded, error] = useFonts({
-    "Poppins-Black": require("../assets/fonts/bold.otf"),
-    "Poppins-Bold": require("../assets/fonts/bold.otf"),
-    "Poppins-ExtraBold": require("../assets/fonts/bold.otf"),
-    "Poppins-ExtraLight": require("../assets/fonts/regular.otf"),
-    "Poppins-Light": require("../assets/fonts/regular.otf"),
-    "Poppins-Medium": require("../assets/fonts/medium.otf"),
-    "Poppins-Regular": require("../assets/fonts/regular.otf"),
-    "Poppins-SemiBold": require("../assets/fonts/bold.otf"),
-    "Poppins-Thin": require("../assets/fonts/regular.otf"),
+    "Installed-Regular": require("../assets/fonts/pregular.otf"),
+    "Installed-Semibold": require("../assets/fonts/psemibold.otf"),
+    "Installed-Bold": require("../assets/fonts/pbold.otf"),
   });
 
   useEffect(() => {
@@ -29,10 +24,6 @@ const RootLayout = () => {
     }
   }, [fontsLoaded, error]);
 
-  if (!fontsLoaded) {
-    return null;
-  }
-
   if (!fontsLoaded && !error) {
     return null;
   }
@@ -40,10 +31,10 @@ const RootLayout = () => {
   return (
     <GlobalProvider>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, navigationBarColor: 'black' }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="additional" options={{ headerShown: false }} />
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="search/[query]" options={{ headerShown: false }} />
       </Stack>
     </GlobalProvider>
   );

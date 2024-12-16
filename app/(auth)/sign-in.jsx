@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
+import { View, Text, ScrollView, Dimensions, Alert } from "react-native";
 
-import { images } from "../../constants";
 import { CustomButton, FormField } from "../../components";
 import { getCurrentUser, signIn } from "../../lib/appwrite";
 import { useGlobalContext } from "../../context/GlobalProvider";
@@ -28,8 +27,6 @@ const SignIn = () => {
       const result = await getCurrentUser();
       setUser(result);
       setIsLogged(true);
-
-      Alert.alert("Success", "User signed in successfully");
       router.replace("/home");
     } catch (error) {
       Alert.alert("Error", error.message);
@@ -39,7 +36,7 @@ const SignIn = () => {
   };
 
   return (
-    <SafeAreaView className="bg-white h-full">
+    <SafeAreaView className="bg-[#111] h-full">
       <ScrollView>
         <View
           className="w-full flex justify-center h-full px-4 my-6"
@@ -47,33 +44,30 @@ const SignIn = () => {
             minHeight: Dimensions.get("window").height - 100,
           }}
         >
-          <Image
-            source={images.logo}
-            resizeMode="contain"
-            className="w-[115px] h-[34px]"
-          />
 
-          <Text className="text-2xl font-semibold mt-10 font-psemibold">
-            Войдите в аккаунт
+          <Text className="text-2xl font-semibold mt-[0px] text-white font-psemibold">
+            войдите в аккаунт
           </Text>
 
           <FormField
-            title="Почта"
+            title="почта"
             value={form.email}
             handleChangeText={(e) => setForm({ ...form, email: e })}
             otherStyles="mt-7"
+            max={100}
             keyboardType="email-address"
           />
 
           <FormField
-            title="Пароль"
+            title="пароль"
+            max={100}
             value={form.password}
             handleChangeText={(e) => setForm({ ...form, password: e })}
             otherStyles="mt-7"
           />
 
           <CustomButton
-            title="Войти"
+            title="войти"
             handlePress={submit}
             containerStyles="mt-7"
             isLoading={isSubmitting}
@@ -81,13 +75,13 @@ const SignIn = () => {
 
           <View className="flex justify-center pt-5 flex-row gap-2">
             <Text className="text-lg text-gray-500 font-pregular">
-              Вы впервые?
+              вы впервые?
             </Text>
             <Link
               href="/sign-up"
-              className="text-lg font-psemibold text-primary"
+              className="text-lg font-psemibold text-[#3c87ff]"
             >
-              Регистрация
+              регистрация
             </Link>
           </View>
         </View>

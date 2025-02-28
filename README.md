@@ -295,3 +295,434 @@ And if you're hungry for more than just a course and want to understand how we l
 </a>
 
 #
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const today = {
+    trainings: 1,
+  }
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+
+    if (hour < 6) {
+        return "доброй ночи";
+    } else if (hour < 12) {
+        return "доброе утро";
+    } else if (hour < 18) {
+        return "добрый день";
+    } else {
+        return "добрый вечер";
+    }
+};
+
+const firstName = user?.name.split(" ")[0];
+
+
+<View className="bg-[#f3f7f8] h-[300px] w-full">
+      <Text className="text-[#00000068] font-pregular text-[23px] mx-6 leading-[26px] pt-[48px]">
+      {`${getGreeting()}`},
+      <Text className="text-[#000000d0] font-pbold"> {`${firstName}`}</Text>
+  , сегодня ещё
+  {today.trainings === 0 ? (
+    <Text> нет тренировок</Text>
+  ) : (
+    <Text className="text-[#000000d0] font-pbold"> {today.trainings} { 
+      today.trainings % 10 === 1 && today.trainings % 100 !== 11 
+        ? 'тренировка' 
+        : (today.trainings % 10 >= 2 && today.trainings % 10 <= 4 && (today.trainings % 100 < 10 || today.trainings % 100 >= 20) 
+          ? 'тренировки' 
+          : 'тренировок')} 
+
+          
+    </Text>
+  )}
+</Text>
+      </View>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <?xml version="1.0" encoding="utf-8"?>
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    android:name="com.google.android.gms.maps.SupportMapFragment"
+    android:id="@+id/map"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
+
+<receiver android:name=".MyWidgetProvider" android:exported="true">
+    <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+    </intent-filter>
+
+    <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_provider" />
+</receiver>
+
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+<uses-permission android:name="android.permission.VIBRATE" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState } from 'react';
+import { ScrollView, View, Text } from 'react-native';
+
+const Calendar = () => {
+
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [selectedDay, setSelectedDay] = useState(0); // добавляем состояние для выделенного дня
+
+    const getStartAndEndDateOfWeek = (index) => {
+        const currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() + (index * 7));
+        const startDate = new Date(currentDate);
+        startDate.setDate(startDate.getDate() - startDate.getDay() + 1); // Пн
+        const endDate = new Date(currentDate);
+        endDate.setDate(endDate.getDate() - endDate.getDay() + 7); // Вс
+        return { startDate, endDate };
+    };
+
+    const months = [
+        'январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
+        'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'
+    ];
+
+    const { startDate } = getStartAndEndDateOfWeek(currentIndex);
+
+    const handleScroll = (event) => {
+        const contentOffsetX = event.nativeEvent.contentOffset.x;
+        const index = Math.round(contentOffsetX / 300);
+        setCurrentIndex(index);
+
+        // Обновление выделенного дня по текущей неделе
+        const currentDay = new Date().getDay(); // Получаем текущий день
+        setSelectedDay(currentDay === 0 ? 6 : currentDay - 1); // Для корректного индекса: Пн = 0, Вт = 1, ..., Вс = 6
+    };
+
+    return (
+        <View className="bg-[#111] w-full h-[100vh]">
+            <ScrollView
+                horizontal={true}
+                pagingEnabled={true}
+                onScroll={handleScroll}
+                className="w-full bg-[#000] h-[50px] snap-x snap-mandatory">
+
+                {[...Array(10)].map((_, index) => (
+                    <View key={index} className="w-[100vw] flex items-center justify-center">
+                        <Text className="text-white font-pbold text-[20px]">
+                            {`${getStartAndEndDateOfWeek(index).startDate.getDate()} ${months[getStartAndEndDateOfWeek(index).startDate.getMonth()]} - ${getStartAndEndDateOfWeek(index).endDate.getDate()} ${months[getStartAndEndDateOfWeek(index).endDate.getMonth()]}`}
+                        </Text>
+                    </View>
+                ))}
+            </ScrollView>
+
+            <View className="w-full bg-[#000] flex-row justify-around p-4">
+                {['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].map((day, index) => (
+                    <Text
+                        key={index}
+                        className={`text-white font-pbold text-[18px] text-center w-[40px] ${selectedDay === index ? 'bg-white text-[#111]' : ''}`}>
+                        {day}
+                    </Text>
+                ))}
+            </View>
+
+            <ScrollView className="flex-1 bg-[#111]">
+                <Text className="text-white font-pbold text-[18px] mx-4 mt-2">планы на пн</Text>
+            </ScrollView>
+        </View>
+    );
+};
+
+export default Calendar;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<TouchableOpacity className="mb-0 flex flex-row justify-center items-center">
+            <Text className="text-xl font-pbold relative text-[#fff] mt-[16px] text-center mb-4">блогеры</Text>
+            <Image
+              className="w-[25px] h-[25px] ml-2"
+              source={icons.right}
+            />
+          </TouchableOpacity>
+
+          <ScrollView horizontal={true}
+            snapToInterval={(width * 0.9225)} // Устанавливаем величину для "щелчка" на следующий элемент
+            decelerationRate="fast" // Быстрая инерция прокрутки
+            showsHorizontalScrollIndicator={false} // Отключаем горизонтальную полосу прокрутки
+            className="relative w-[100vw] h-[135px] rounded-3xl pl-4 mb-[8px]">
+
+            {users.map(user => {
+              var newList = user?.sports.map(str => {
+                const matchedObject = types.find(type => type.key === str);
+                return matchedObject ? matchedObject.title : null;
+              }).filter(title => title !== null); // Удаляем значения null из нового списка
+
+              return (
+                <TouchableOpacity activeOpacity={1} key={user} onPress={() => navigation.navigate('otherProfile', { user })} className="w-[90vw] rounded-3xl h-full mr-[3vw] bg-[#0b0b0b]">
+                  <Image
+                    source={{ uri: user.imageUrl }}
+                    className="w-[45vw] h-[135px] rounded-3xl absolute bg-[#252525]"
+                  />
+                  <LinearGradient start={{ x: 0.6, y: 0 }} end={{ x: 0.73, y: 0 }} className="h-full absolute left-0 top-0 w-[50vw] z-10" colors={['#fff0', '#0b0b0b']}></LinearGradient>
+                  <Text className="text-[#fff] text-[18px] font-pbold text-right mr-4 mt-2 z-20 mb-[6px]">{user.name}</Text>
+                  <View className="ml-[38vw] max-w-[52vw] z-20 flex w-full flex-row flex-wrap justify-end pr-[12px]">
+                    {newList.map(kind =>
+                      <View className="bg-[#121212] border-[1px] border-[#191919] shadow-lg flex relative rounded-3xl m-[2px] pt-[1px] pb-[3px] px-[9px] z-20"><Text className="font-pregular text-[#bdbdbd]">{kind}</Text></View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              )
+            })}
+          </ScrollView>
+
+
+
+
+
+
+
+
+           <LinearGradient colors={['#111', '#222']} className="h-[190px] mx-4 px-4 rounded-3xl">
+                <View className="flex-row flex-wrap justify-start pt-4">
+                  {rows.map((row, rowIndex) => (
+                    <View key={rowIndex} className="flex-row w-full justify-start">
+                      {row.map(({ day, isCurrentMonth }, dayIndex) => {
+                        const isToday = today.date() === day && today.month() === currentMonth.month() && today.year() === currentMonth.year();
+                        const isWeekend = dayIndex === 5 || dayIndex === 6; // Суббота и воскресенье
+
+                        let textColor = isCurrentMonth ? 'text-white' : 'text-[#838383]';
+                        if (isToday && isCurrentMonth) {
+                          textColor = 'text-black bg-white rounded-full'; // Выделение сегодняшнего дня
+                        } else if (isWeekend) {
+                          textColor = isCurrentMonth ? 'text-red-500' : textColor; // Красный цвет выходных текущего месяца
+                        }
+
+                        return (
+                          <View key={dayIndex} className="flex-1 py-0">
+                            <Text className={`text-left text-[16px] font-pregular ${textColor} ${isToday && isCurrentMonth ? 'font-pbold' : ''}`}>
+                              {day}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  ))}
+                </View>
+              </LinearGradient>
+
+
+
+
+
+
+
+
+
+
+
+
+              
+      <MapView
+        style={{ flex: 1 }}
+        initialRegion={initialRegion}
+        showsUserLocation={true}
+        followUserLocation={true}
+        onPress={creatingRoute ? handleMapPress : () => { setShowingDetails(false) }}
+      >
+        {routes.length !== 0 && (
+          routes.map((route, index) => (
+            route.coord && route.coord.length >= 2 && (
+              <Polyline
+                key={index}
+                coordinates={route.coord}
+                strokeColor='black'
+                strokeWidth={3}
+                tappable
+                onPress={() => showRouteDetails(route)}
+              />
+            )))
+        )}
+
+        {newRouteCoords.length > 0 && (
+          <Polyline
+            coordinates={newRouteCoords}
+            strokeColor='blue'
+            strokeWidth={3}
+          />
+        )}
+      </MapView>

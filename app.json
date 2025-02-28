@@ -24,6 +24,10 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#111"
       },
+      "statusBar": {
+        "visible": false,
+        "hidden": true
+      },
       "package": "athlete.com"
     },
     "web": {

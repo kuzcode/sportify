@@ -1,13 +1,29 @@
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Stack, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { Loader } from "../../components";
 import { useGlobalContext } from "../../context/GlobalProvider";
+import NetInfo from '@react-native-community/netinfo';
+import { useState, useEffect } from "react";
 
 const AuthLayout = () => {
   const { loading, isLogged } = useGlobalContext();
+  const [net, setNet] = useState(true);
 
-  if (!loading && isLogged) return <Redirect href="/home" />;
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      if (!state.isConnected) {
+        setNet(false)
+        router.push('/noNet')
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  if (!loading && net && isLogged) return <Redirect href="/home" />;
 
   return (
     <>
@@ -20,6 +36,18 @@ const AuthLayout = () => {
         />
         <Stack.Screen
           name="sign-up"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="help"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="noNet"
           options={{
             headerShown: false,
           }}

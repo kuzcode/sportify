@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useFonts } from 'expo-font';
-import { Stack } from "expo-router";
+import NetInfo from '@react-native-community/netinfo';
+import { Stack, router } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'react-native';
 import GlobalProvider from "../context/GlobalProvider";
@@ -32,9 +33,9 @@ const RootLayout = () => {
     <GlobalProvider>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false, navigationBarColor: 'black' }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="additional" options={{ headerShown: false }} />
-        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false, navigationBarColor: '#111' }} />
+        <Stack.Screen name="additional" options={{ headerShown: false, navigationBarColor: 'black' }} />
+        <Stack.Screen name="index" options={{ headerShown: false, navigationBarColor: '#111' }} />
       </Stack>
     </GlobalProvider>
   );

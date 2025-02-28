@@ -1,4 +1,6 @@
 import { View, ActivityIndicator, Dimensions, Platform } from "react-native";
+import { ResizeMode, Video } from "expo-av";
+import video from "../loader.mp4"
 
 const Loader = ({ isLoading }) => {
   const osName = Platform.OS;
@@ -13,11 +15,15 @@ const Loader = ({ isLoading }) => {
         height: screenHeight,
       }}
     >
-      <ActivityIndicator
-        animating={isLoading}
-        color="#fff"
-        size={osName === "ios" ? "large" : 50}
+      <Video
+        source={video}
+        className="w-full h-full mt-3 absolute top-0 m-0"
+        resizeMode={ResizeMode.COVER}
+        shouldPlay
+        isLooping
+        isMuted={true}
       />
+
     </View>
   );
 };

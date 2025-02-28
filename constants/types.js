@@ -27,10 +27,10 @@ export const toTrack = [
 
 export const meal = [
     {
-    colorA: '#ffffff12',
-    colorB: '#fff',
-    title: 'массонабор',
-    icon: 'up'
+        colorA: '#ffffff12',
+        colorB: '#fff',
+        title: 'массонабор',
+        icon: 'up'
     }
 ]
 
@@ -52,19 +52,55 @@ export const types = [
     { title: 'теннис', key: '14' },
 ];
 
+
 export const colors = [
     ['#1B1B1B', '#36454F'],
-    ['#58111A', '#660000'],
-    ['#964B00', '#E25822'],
-    ['#3D0C02', '#993300'],
-    ['#B8860B', '#EF9B0F'],
-    ['#3B3C36', '#013220'],
+    ['#3c87ff', '#3c87ff'],
+    ['#f78ca0', '#f9748f', '#f9748f', '#fe9a8b'],
+    ['#fcc5e4', '#fda34b', '#ff7882', '#c8699e', '#7046aa', '#0c1db8', '#020f75'],
+    ['#ff0844', '#ffb199'],
+    ['#11b153', '#006632'],
     ['#003262', '#6082B6'],
     ['#ACE1AF', '#50C878'],
     ['#89CFF0', '#007FFF'],
     ['#6F00FF', '#8A2BE2'],
     ['#4B2E39', '#32021F'],
     ['#A52A2A', '#3D0C02']
+]
+
+export const rank = [
+    {
+        exp: 100,
+        color: '#67e774',
+        name: 'дрыщ'
+    },
+    {
+        exp: 300,
+        color: '#ff8fe8',
+        name: 'девчонка'
+    },
+    {
+        exp: 750,
+        color: '#a8c0d2',
+        name: 'качок'
+    },
+    {
+        exp: 1250,
+        color: '#27232e',
+        name: 'терминатор',
+        text: 'white'
+    },
+    {
+        exp: 2000,
+        color: '#0bffbd',
+        name: 'мр. олимпия'
+    },
+    {
+        exp: 10000,
+        color: '#3c87ff',
+        name: 'атлет',
+        text: 'white'
+    },
 ]
 
 export const trackTypes = [
@@ -76,5 +112,8 @@ export const trackTypes = [
     },
     {
         title: 'пить воду'
+    },
+    {
+        title: 'каждый день'
     },
 ]

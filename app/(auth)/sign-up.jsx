@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, ScrollView, Dimensions, Alert, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, Dimensions, Alert, TouchableOpacity, Image } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
-import { launchImageLibrary } from 'react-native-image-picker';
 
 import { images } from "../../constants";
 import { createUser } from "../../lib/appwrite";
-import { CustomButton, FormField, Selecter } from "../../components";
+import { CustomButton, FormField } from "../../components";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { types } from "../../constants/types";
 
@@ -22,27 +21,25 @@ const SignUp = () => {
     password: "",
     bio: "",
     sports: [],
-    avatar: null
+    avatar: null,
+    weight: 0
   });
 
-  const selectImage = () => {
-    const options = {
-      mediaType: 'photo',
-      includeBase64: false,
-    };
+  const selectImage = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ["image/png", "image/jpg", "image/jpeg"],
+        copyToCacheDirectory: true, // Опция для кэширования файла
+      });
 
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorCode) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        setForm({
-          ...form,
-          avatar: response.assets[0],
-        });
-      }
-    });
+      setForm({
+        ...form,
+        avatar: result.assets[0],
+      });
+
+    } catch (error) {
+      console.error('Ошибка при открытии выборщика:', error);
+    }
   };
 
 
@@ -50,7 +47,7 @@ const SignUp = () => {
   const submit = async () => {
     setSubmitting(true);
     try {
-      const result = await createUser(form.email, form.password, form.username, form.name, form.sports);
+      const result = await createUser(form);
       setUser(result);
       setIsLogged(true);
 
@@ -64,15 +61,15 @@ const SignUp = () => {
 
   const toggleSportInForm = (type) => {
     setForm(prevForm => {
-        const isSportInArray = prevForm.sports.includes(type.key);
-        return {
-            ...prevForm,
-            sports: isSportInArray
-                ? prevForm.sports.filter(sport => sport !== type.key) // удаляем
-                : [...prevForm.sports, type.key] // добавляем
-        };
+      const isSportInArray = prevForm.sports.includes(type.key);
+      return {
+        ...prevForm,
+        sports: isSportInArray
+          ? prevForm.sports.filter(sport => sport !== type.key) // удаляем
+          : [...prevForm.sports, type.key] // добавляем
+      };
     });
-};
+  };
 
 
 
@@ -80,20 +77,24 @@ const SignUp = () => {
 
 
   const next = () => {
-    //if (form.username === "" || form.email === "" || form.password === "" || form.name === "") {
-      //Alert.alert("Error", "Please fill in all fields");
-    //}
-
-    setVisible(visible + 1);
+    if (form.username === "" || form.email === "" || form.password === "" || form.name === "") {
+      alert("а вот и нет! заполни все поля!");
+    }
+    else if (/^[A-Za-z0-9]*$/.test(form.username)) {
+      setVisible(visible + 1);
+    }
+    else {
+      alert("никнейм может содержать только буквы английского алфавита и цифры");
+    }
   }
 
   const [searchText, setSearchText] = useState('');
-  
+
   const filteredTypes = types
     .filter(type => type.title.toLowerCase().startsWith(searchText.toLowerCase()))
     .concat(
-      types.filter(type => !type.title.toLowerCase().startsWith(searchText.toLowerCase()) && 
-      type.title.toLowerCase().includes(searchText.toLowerCase()))
+      types.filter(type => !type.title.toLowerCase().startsWith(searchText.toLowerCase()) &&
+        type.title.toLowerCase().includes(searchText.toLowerCase()))
     );
 
   return (
@@ -106,66 +107,54 @@ const SignUp = () => {
           }}
         >
 
-      {visible == 1 && (
-        <View className='top-0 left-0 bg-[#111] absolute z-10 w-[100vw] h-full px-4'>
-          <Text className='text-white font-pbold text-[22px] mt-10'>выберите, какими видами спорта вы увлечены</Text>
+          {visible == 1 && (
+            <View className='top-0 left-0 bg-[#111] absolute z-10 w-[100vw] h-full px-4'>
+              <Text className='text-white font-pbold text-[22px] mt-10'>выбери, какими видами спорта вы увлечены</Text>
 
-          <FormField placeholder='поиск' onChangeText={text => setSearchText(text)} />
-          <View className="flex flex-row flex-wrap pt-4">
-            {filteredTypes.map(type =>
-              <TouchableOpacity 
-              activeOpacity={0.8}
-              onPress={() => {
-                toggleSportInForm(type)
-              }} className="px-[18px] py-[6px] rounded-2xl mr-[6px] mb-[6px]" style={{ backgroundColor: form.sports.includes(type.key) ? 'white' : '#252525' }} key={type.key}>
-                <Text className="font-pbold text-[16px]" style={{ color: form.sports.includes(type.key) ? '#333' : '#f5f5f5' }}>{type.title}</Text>
+              <FormField placeholder='поиск' onChangeText={text => setSearchText(text)} />
+              <View className="flex flex-row flex-wrap pt-4">
+                {filteredTypes.map(type =>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      toggleSportInForm(type)
+                    }} className="px-[18px] py-[6px] rounded-2xl mr-[6px] mb-[6px]" style={{ backgroundColor: form.sports.includes(type.key) ? 'white' : '#252525' }} key={type.key}>
+                    <Text className="font-pbold text-[16px]" style={{ color: form.sports.includes(type.key) ? '#333' : '#f5f5f5' }}>{type.title}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+
+              <TouchableOpacity className="absolute w-full bottom-[20px] bg-primary mx-4 py-4 rounded-2xl" onPress={next}>
+                <Text className="font-pregular text-white text-[18px] text-center">{form.sports.length == 0 ? ('пропустить') : ('дальше')}</Text>
               </TouchableOpacity>
-            )}
-          </View>
-
-
-          <TouchableOpacity className="absolute w-full bottom-[20px] bg-primary mx-4 py-4 rounded-2xl" onPress={next}>
-                <Text className="font-pregular text-white text-[18px] text-center">{form.sports.length == 0 ? ('пропустить') : ('дальше')}</Text>
-            </TouchableOpacity>
-        </View>
-      )}
-
-      {visible == 2 && (
-        <View className='top-0 left-0 bg-[#111] absolute z-10 w-[100vw] h-full px-4'>
-          <Text className='text-white font-pbold text-[22px] mt-10'>дополнительная информация</Text>
-          {form.avatar == null ? (
-            <TouchableOpacity onPress={selectImage} className="bg-[#252525] h-[160px] w-[160px] mx-auto mt-7 rounded-full">
-
-            </TouchableOpacity>
-          ) : (
-            <Image 
-            source={{ uri: form.avatar.uri }}
-            className="w-[160px] h-[160px]"
-            />
+            </View>
           )}
-          
-          <FormField
-            title="описание"
-            value={form.bio}
-            handleChangeText={(e) => setForm({ ...form, bio: e })}
-            otherStyles="mt-7"
-            multiline={true}
-            max={1024}
-            numberOfStrokes={10}
-          />
 
-          <Selecter
-          title="район"
-          options={['привет', 'пока']}
-          otherStyles='mt-7'
-          />
+          {visible == 2 && (
+            <View className='top-0 left-0 bg-[#111] absolute z-10 w-[100vw] h-full px-4'>
+              <Text className='text-white font-pbold text-[22px] mt-10'>дополнительная информация</Text>
+              <TouchableOpacity onPress={selectImage} className="bg-[#252525] h-[160px] w-[160px] mx-auto mt-4 rounded-full">
+                <Image
+                  source={{ uri: form?.avatar?.uri }}
+                  className="w-[160px] h-[160px] rounded-full"
+                />
+              </TouchableOpacity>
 
-
-          <TouchableOpacity className="absolute w-full bottom-[20px] bg-primary mx-4 py-4 rounded-2xl" onPress={submit}>
-                <Text className="font-pregular text-white text-[18px] text-center">{form.sports.length == 0 ? ('пропустить') : ('дальше')}</Text>
-            </TouchableOpacity>
-        </View>
-      )}
+              <FormField
+                title="описание"
+                value={form.bio}
+                handleChangeText={(e) => setForm({ ...form, bio: e })}
+                otherStyles="mt-4"
+                multiline={true}
+                max={1024}
+                numberOfStrokes={10}
+              />
+              <TouchableOpacity className="absolute w-full bottom-[20px] bg-primary mx-4 py-4 rounded-2xl" onPress={submit}>
+                <Text className="font-pregular text-white text-[18px] text-center">{form.avatar ? ('пропустить') : ('войти в приложение')}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <Text className="text-white text-2xl font-semibold mt-0 font-psemibold">
             создайте аккаунт
@@ -175,21 +164,21 @@ const SignUp = () => {
             title="имя"
             value={form.name}
             handleChangeText={(e) => setForm({ ...form, name: e })}
-            otherStyles="mt-10"
+            otherStyles="mt-7"
           />
 
           <FormField
             title="никнейм"
             value={form.username}
             handleChangeText={(e) => setForm({ ...form, username: e })}
-            otherStyles="mt-10"
+            otherStyles="mt-4"
           />
 
           <FormField
             title="почта"
             value={form.email}
             handleChangeText={(e) => setForm({ ...form, email: e })}
-            otherStyles="mt-7"
+            otherStyles="mt-4"
             keyboardType="email-address"
           />
 
@@ -197,13 +186,13 @@ const SignUp = () => {
             title="пароль"
             value={form.password}
             handleChangeText={(e) => setForm({ ...form, password: e })}
-            otherStyles="mt-7"
+            otherStyles="mt-4"
           />
 
           <CustomButton
             title="дальше"
             handlePress={next}
-            containerStyles="mt-7"
+            containerStyles="mt-4"
             isLoading={isSubmitting}
           />
 

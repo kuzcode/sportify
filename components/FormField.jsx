@@ -30,14 +30,14 @@ const FormField = ({
           onChangeText={handleChangeText}
           multiline={multiline}
           numberOfLines={numberOfStrokes}
-          secureTextEntry={title === "Password" && !showPassword}
+          secureTextEntry={title === "пароль" && !showPassword}
           {...props}
         />
-      
+
         <Text className="text-[19px] text-[#838383] font-pbold mb-1">{measure}</Text>
         {max && (<Text className="text-[15px] absolute top-[16px] right-[16px] text-right text-[#838383] font-pregular mb-1">{value?.length}/{max}</Text>
         )}
-        {title === "Password" && (
+        {title === "пароль" && (
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Image
               source={!showPassword ? icons.eye : icons.eyeHide}

@@ -29,7 +29,8 @@ const SignIn = () => {
       setIsLogged(true);
       router.replace("/home");
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("ошибка", `напишите в поддержку, \n\nтекст ошибки: ${error.message}`);
+      router.push('/help')
     } finally {
       setSubmitting(false);
     }

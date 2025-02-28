@@ -27,8 +27,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
 
 const TabLayout = () => {
   const { loading, isLogged } = useGlobalContext();
-
-  if (!loading && !isLogged) return <Redirect href="/sign-in" />;
+  if (!loading && !isLogged) return <Redirect href="/sign-up" />;
 
   return (
     <>
@@ -61,7 +60,7 @@ const TabLayout = () => {
           }}
         />
 
-    <Tabs.Screen
+        <Tabs.Screen
           name="map"
           options={{
             title: "map",
@@ -91,7 +90,7 @@ const TabLayout = () => {
             ),
           }}
         />
-         <Tabs.Screen
+        <Tabs.Screen
           name="new"
           options={{
             title: "New",
@@ -124,7 +123,6 @@ const TabLayout = () => {
       </Tabs>
 
       <Loader isLoading={loading} />
-      <StatusBar backgroundColor="#161622" style="light" />
     </>
   );
 };

@@ -21,6 +21,8 @@ const Calendar = () => {
         calendarId: calendar.$id,
         icon: 'contest',
         date: null,
+        title: '',
+        description: ''
     });
     const [ren, setRen] = useState(calendar.repeaten)
     const [addShown, setAddShown] = useState(false);
@@ -126,11 +128,20 @@ const Calendar = () => {
                         max={100}
                     />
 
+                    <FormField
+                        title={'описание'}
+                        value={form.description}
+                        handleChangeText={(e) => setForm({ ...form, description: e })}
+                        otherStyles={'mx-4 mt-4'}
+                        multiline={true}
+                        numberOfStrokes={4}
+                        max={1000}
+                    />
+
                     <Text className="text-[19px] text-[#838383] font-pbold mt-4 mx-4 mb-1">тип</Text>
                     <View className="mx-4 flex flex-row justify-between">
                         <TouchableOpacity onPress={() => {
                             setForm({ ...form, release: 0 });
-                            console.log(form.release)
                             setForm({ ...form, type: 0 });
                         }} className={`${form.type === 0 ? 'bg-white' : 'bg-[#111]'} py-2 rounded-xl w-[49%]`}>
                             <Text className={`${form.type === 0 ? 'text-black' : 'text-white'} text-center text-[18px] font-pregular`}>разовый план</Text>
@@ -173,7 +184,7 @@ const Calendar = () => {
                             <Text className="text-[19px] text-[#838383] font-pbold mt-4 mx-4 mb-1">как часто повторять</Text>
 
                             <View className="mx-4 flex flex-row flex-wrap">
-                                <TouchableOpacity onPress={() => { setForm({ ...form, type: 0 }) }} className={`${form.repeat === 0 ? 'bg-white' : 'bg-[#111]'} py-2 rounded-xl px-4`}>
+                                <TouchableOpacity onPress={() => { setForm({ ...form, repeat: 1, days: [0, 1, 2, 3, 4, 5, 6] }) }} className={`${form.repeat === 0 ? 'bg-white' : 'bg-[#111]'} py-2 rounded-xl px-4 mr-2`}>
                                     <Text className={`${form.repeat === 0 ? 'text-black' : 'text-white'} text-center text-[18px] font-pregular`}>каждый день</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => { setForm({ ...form, repeat: 1 }) }} className={`${form.repeat === 1 ? 'bg-white' : 'bg-[#111]'} py-2 rounded-xl px-4`}>
@@ -184,7 +195,7 @@ const Calendar = () => {
                     )}
 
 
-                    {form.repeat === 1 && (
+                    {form.repeat === 1 && form.type === 1 && (
                         <View>
                             <Text className="text-[19px] text-[#838383] font-pbold mt-4 mx-4 mb-1">выбери дни</Text>
 
@@ -235,17 +246,15 @@ const Calendar = () => {
                         )}
                     </View>
 
-
                     <TouchableOpacity
                         onPress={() => {
-                            console.log(form)
                             if (form.type === 0) {
                                 createPlan(form)
                             }
                             //createRepeaten(form);
                             setPlanningShown(false);
                         }}
-                        className="bg-white py-2 rounded-2xl absolute bottom-[85px] right-4 left-4">
+                        className="bg-white py-2 rounded-2xl absolute top-[92vh] right-4 left-4">
                         <Text className="text-center text-[19px] font-pregular">сохранить</Text>
                     </TouchableOpacity>
                 </View>
@@ -285,7 +294,6 @@ const Calendar = () => {
 
                     <TouchableOpacity
                         onPress={() => {
-                            console.log('current: ', current)
                             deleteOtherProgramms(current);
                             setPlanShown(false);
                         }}
@@ -332,8 +340,7 @@ const Calendar = () => {
                     const mondayDate = new Date(today);
                     mondayDate.setDate(today.getDate() + mondayOffset);
 
-                    const currentDate = mondayDate;
-
+                    const currentDate = mondayDate.getDate() + index;
                     return (
                         <View key={index} className="bg-[#111] mx-4 rounded-3xl py-3 mt-4">
                             <Text className="text-[#838383] text-[19px] font-pbold mx-4">{a}</Text>
@@ -353,7 +360,7 @@ const Calendar = () => {
                             ))}
 
                             {plan.map((singlePlan, j) => (
-                                (currentDate && singlePlan.date && singlePlan.date === currentDate) && (
+                                (currentDate && singlePlan.date && new Date(singlePlan.date).getDate() === currentDate) && (
                                     <TouchableOpacity
                                         key={`single-${j}`}
                                         onPress={() => {
@@ -397,11 +404,11 @@ const Calendar = () => {
 
             <TouchableOpacity
                 onPress={() => { setAddShown(true) }}
-                className="bg-[#fff] absolute top-[92vh] right-10 w-[60px] h-[60px] rounded-full flex justify-center items-center p-0">
+                className="bg-[#fff] absolute top-[90vh] right-8 w-[60px] h-[60px] rounded-full flex justify-center items-center p-0">
                 <Text className="font-pbold text-[30px] m-0">+</Text>
             </TouchableOpacity>
 
-            <View className="mb-[60px]">
+            <View className="mt-[40vh]">
             </View>
         </ScrollView>
     );

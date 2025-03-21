@@ -6,8 +6,10 @@ import Loader from "./Loader";
 import Trending from "./Trending";
 import SearchInput from "./SearchInput";
 import EmptyState from "./EmptyState";
+import TrBox from "./TrainingBox";
 
 export {
+  TrBox,
   VideoCard,
   FormField,
   CustomButton,

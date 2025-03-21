@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View, Image } from "react-native";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import useAppwrite from "../../lib/useAppwrite";
-import { getUserTrackers } from "../../lib/appwrite";
+import { deleteTrack, getUserTrackers } from "../../lib/appwrite";
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from "expo-linear-gradient";
 import { colors, trackTypes } from "../../constants/types";
@@ -14,11 +14,28 @@ const Trackers = () => {
   const { data: trackers } = useAppwrite(() => getUserTrackers(user?.$id));
   const navigation = useNavigation();
   const [shown, setShown] = useState(false);
+  const [shownA, setShownA] = useState(false);
   const [current, setCurrent] = useState({});
 
 
   return (
     <ScrollView className="bg-black h-full w-full">
+      {shownA && (
+        <View className="bg-[#222] absolute z-20 top-[25vh] left-8 right-8 px-4 py-3 rounded-3xl">
+          <Text className="text-white text-[20px] font-pbold">удалить трекер?</Text>
+          <Text className="text-[#838383] text-[18px] font-pregular">весь прогресс будет утерян</Text>
+          <TouchableOpacity onPress={() => { setShownA(false) }} className="bg-[#333] py-2 rounded-2xl mt-2">
+            <Text className="text-center text-[19px] font-pregular text-white">оставить</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => {
+            deleteTrack(current.$id);
+            router.push('/home');
+          }} className="bg-[#fff] py-2 rounded-2xl mt-3">
+            <Text className="text-center text-[19px] font-pregular">удалить</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {shown && (
         <View className="bg-black w-[100vw] h-full absolute top-0 z-10">
           <View className="flex flex-row justify-between items-center w-full absolute right-0 top-8 z-20">
@@ -49,8 +66,15 @@ const Trackers = () => {
               </View>
             )}
           </LinearGradient>
+
+          <TouchableOpacity
+            onPress={() => { setShownA(true) }}
+            className="py-3 rounded-2xl bg-[#1d0a0a] mx-4">
+            <Text className="text-[18px] font-pregular relative text-[#ffb0b0] text-center">удалить трекер</Text>
+          </TouchableOpacity>
         </View>
       )}
+
 
       <TouchableOpacity onPress={() => {
 

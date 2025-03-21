@@ -2,17 +2,17 @@ import { router } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View, Image } from "react-native";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import useAppwrite from "../../lib/useAppwrite";
-import { getUserTrackers, joinCommunity, leaveCommunity } from "../../lib/appwrite";
+import { getUserCommunities, getAllCommunities, joinCommunity, leaveCommunity } from "../../lib/appwrite";
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "../../constants/types";
 import { useState, useEffect } from "react";
-import { getUserCommunities, getAllCommunities } from "../../lib/appwrite";
 import { icons } from "../../constants";
 
 const Comms = () => {
     const [{ user }, setUser] = useState(useGlobalContext());
-    const [communities, setCommunities] = useState([])
+    const [communities, setCommunities] = useState([]);
+    const [created, setCreated] = useState([]);
     const [recs, setRecs] = useState([])
     const [recsShown, setRecsShown] = useState(false);
     const [alShown, setAlShown] = useState(false);
@@ -53,16 +53,22 @@ const Comms = () => {
 
 
     useEffect(() => {
-        const fetchCommunities = async () => {
+        const fetchRecs = async () => {
             const data = await getAllCommunities();
+            const filteredCommunities = data.filter(com =>
+                com.users.includes(user.$id)
+            );
+            const filteredCreated = data.filter(com =>
+                com.creator === user.$id
+            );
+
             setRecs(data);
+            setCreated(filteredCreated);
+            setCommunities(filteredCommunities);
         };
 
-        console.log(recs)
-
-        fetchCommunities();
+        fetchRecs();
     }, []);
-
 
     return (
         <ScrollView className="bg-[#000] h-[100vh] w-full">
@@ -188,17 +194,71 @@ const Comms = () => {
 
             <TouchableOpacity
                 onPress={() => { router.push('/additional/createComm') }}
-                className="bg-[#111] rounded-3xl mt-4 py-10 mx-4">
+                className="bg-[#111] rounded-3xl mt-4 h-[100px] mx-4 flex items-center justify-center">
                 <Text className="text-[20px] font-pbold relative mx-4 text-[#fff] text-center">+ создай сообщество</Text>
             </TouchableOpacity>
 
+            {communities.map(com =>
+                <TouchableOpacity onPress={() => {
+                    setCurrent(com);
+                    setRecsShown(true);
+                }} className="bg-[#111] rounded-3xl flex flex-row mx-4 mt-4">
+                    {com.imageUrl && (
+                        <Image
+                            source={{ uri: com.imageUrl }}
+                            className="w-[100] h-[100] rounded-l-3xl"
+                        />
+                    )}
+
+                    <View className="flex flex-col">
+                        <View className="flex flex-row">
+                            <Text className="text-white font-pbold text-[21px] ml-4 mr-1">{com.name}</Text>
+                            {com.isVerif && (
+                                <Image
+                                    source={icons.verify}
+                                    className="w-6 h-6 mt-[5]"
+                                />
+                            )}
+                        </View>
+                        <Text className="text-[#838383] font-pregular text-[17px] ml-4 mt-[-3] mr-1">{com.users.length} участник</Text>
+                    </View>
+                </TouchableOpacity>
+            )}
+
+            <Text className="text-[21px] font-pbold relative mx-4 text-[#fff] mt-[32px]">создано</Text>
+            {created.map(com =>
+                <TouchableOpacity onPress={() => {
+                    setCurrent(com);
+                    setRecsShown(true);
+                }} className="bg-[#111] rounded-3xl flex flex-row mx-4 mt-4">
+                    {com.imageUrl && (
+                        <Image
+                            source={{ uri: com.imageUrl }}
+                            className="w-[100] h-[100] rounded-l-3xl"
+                        />
+                    )}
+
+                    <View className="flex flex-col">
+                        <View className="flex flex-row">
+                            <Text className="text-white font-pbold text-[21px] ml-4 mr-1">{com.name}</Text>
+                            {com.isVerif && (
+                                <Image
+                                    source={icons.verify}
+                                    className="w-6 h-6 mt-[5]"
+                                />
+                            )}
+                        </View>
+                        <Text className="text-[#838383] font-pregular text-[17px] ml-4 mt-[-3] mr-1">{com.users.length} участник</Text>
+                    </View>
+                </TouchableOpacity>
+            )}
 
             <Text className="text-[21px] font-pbold relative mx-4 text-[#fff] mt-[32px]">рекомендуем</Text>
             {recs.map(item =>
                 <TouchableOpacity onPress={() => {
                     setCurrent(item);
                     setRecsShown(true);
-                }} className="bg-[#111] rounded-3xl mb-10 flex flex-row mx-4 mt-4">
+                }} className="bg-[#111] rounded-3xl flex flex-row mx-4 mt-4">
                     {item.imageUrl && (
                         <Image
                             source={{ uri: item.imageUrl }}

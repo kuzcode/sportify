@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View, Dimensions, Image, StyleSheet, Vibration } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, Dimensions, Image, StyleSheet, Vibration, ActivityIndicator } from "react-native";
 import { ResizeMode, Video } from "expo-av";
 import background from "../../assets/video.mp4"
 
@@ -8,12 +8,17 @@ import { useState, useRef, useEffect } from "react";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { icons } from "../../constants";
 import useAppwrite from "../../lib/useAppwrite";
-import { getAllQuotes, getUserTrainings, getUserTrackers, getAllUsers, getUserMeal, likeQuote, getAllCommunities, getUserCalendar, getUserNotifications, getHot, getUserById, getCommunityById } from "../../lib/appwrite";
+import { getAllQuotes, getUserTrainings, getUserTrackers, getAllUsers, getUserMeal, likeQuote, getAllCommunities, getUserCalendar, getUserNotifications, getHot, getUserById, getCommunityById, updateTracker, getHotTrainings, getCalendarPlan, getComPosts, getUserCommunities, getUserFriends, sendNotif, sendNotification, getHotPosts, getRecommendedTrainings } from "../../lib/appwrite";
 import { types } from "../../constants/types";
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from "expo-linear-gradient";
 import { colors, meal } from "../../constants/types";
 import moment from 'moment';
+import { exercises } from "../../constants/exercises";
+import WebView from "react-native-webview";
+import mapTemplate from '../map-template';
+import Svg, { Polyline } from 'react-native-svg';
+import { fr } from "date-fns/locale";
 
 const CurrentDate = moment().date(); // Получаем текущее число
 const daysInMonth = moment().daysInMonth(); // Получаем количество дней в текущем месяце
@@ -23,13 +28,20 @@ const Home = () => {
   const navigation = useNavigation();
   const { user } = useGlobalContext();
   const { data: trainings, loading: trainingsLoading } = useAppwrite(() => getUserTrainings(user?.$id));
-  const { data: trackers, loading: trackersLoading } = useAppwrite(() => getUserTrackers(user?.$id));
+  const [trackers, setTrackers] = useState([])
   const { data: users } = useAppwrite(getAllUsers);
 
   const [mealForm, setMealForm] = useState({});
   const [communities, setCommunities] = useState([])
+  const [combinedData, setCombinedData] = useState([])
 
   const [recsShown, setRecsShown] = useState(false);
+
+  const [moreShown, setMoreShown] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [shareShown, setShareShown] = useState(false);
+  const [more, setMore] = useState({});
+
   const [alShown, setAlShown] = useState(false);
   const [current, setCurrent] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -37,12 +49,40 @@ const Home = () => {
   const [calendar, setCalendar] = useState({});
   const [notifications, setNotifications] = useState([])
   const [notificationsCount, setNotificationsCount] = useState(0)
+  const [ucoms, setUcoms] = useState([])
   const [hot, setHot] = useState([])
+  const [plan, setPlan] = useState([])
+  const [posts, setPosts] = useState([])
+  const [comPosts, setComPosts] = useState([])
+  const [friends, setFriends] = useState([])
+  const [frList, setFrList] = useState([])
+
+  const [detail, setDetail] = useState({});
+  const [detailShown, setDetailShown] = useState(false);
 
   const hanScroll = (event) => {
     const yOffset = event.nativeEvent.contentOffset.y;
     setScrollPosition(yOffset);
   };
+
+  const webRef = useRef(null);
+
+  const w = 100;
+  const height = 100;
+
+  const coordinates = [
+    { x: 1, y: 1.2 },
+    { x: 2, y: 18 },
+    { x: 9, y: 20 },
+    { x: 1, y: 1 },
+  ]
+
+  // Преобразуем координаты в относительные по размеру квадрата
+  const points = coordinates.map(coord => {
+    const x = (coord.x / 100) * width; // предполагаем, что значения x варьируются от 0 до 100
+    const y = height - (coord.y / 100) * height; // инвертируем y, чтобы верхний край был 0
+    return `${x},${y}`;
+  }).join(' ');
 
   useEffect(() => {
     const fetchCommunities = async () => {
@@ -53,6 +93,76 @@ const Home = () => {
     fetchCommunities();
   }, []);
 
+  useEffect(() => {
+    const fetchUComs = async () => {
+      const data = await getUserCommunities(user.$id);
+      set(data);
+    };
+
+    fetchUComs();
+  }, []);
+
+  useEffect(() => {
+    const fetchTr = async () => {
+      const data = await getUserTrackers(user.$id);
+      const upd = data.map(tracker => ({
+        ...tracker,
+        todayDone: tracker.today === 0 ? false : true,
+      }));
+
+      setTrackers(upd);
+    };
+    fetchTr();
+  }, []);
+
+
+  useEffect(() => {
+    const fetchAllData = async () => {
+      const trainingsData = await getHotTrainings(frList);
+      const postsData = await getHotPosts(frList);
+      const comPostsData = await getComPosts(['67a875d30003adba09c9']);
+
+      var enrichedTrainings = [];
+      if (frList.length > 0) {
+        enrichedTrainings = await Promise.all(trainingsData.map(async (item) => {
+          const user = await getUserById(item.userId);
+          return { ...item, name: user.documents[0].name, imageUrl: user.documents[0].imageUrl, from: 0 };
+        }));
+      }
+
+      const enrichedPosts = await Promise.all(postsData.map(async (item) => {
+        const user = await getUserById(item.creator);
+        return { ...item, name: user.documents[0].name, imageUrl: user.documents[0].imageUrl, from: 1 };
+      }));
+
+      const enrichedComPosts = await Promise.all(comPostsData.map(async (item) => {
+        const community = await getCommunityById('67a875d30003adba09c9')
+        return { ...item, name: community.name, imageUrl: community.imageUrl, verif: community.isVerif, from: 2 };
+      }));
+
+      const allData = [...enrichedTrainings, ...enrichedPosts, ...enrichedComPosts];
+      const shuffledData = allData.sort(() => Math.random() - 0.5);
+
+      if (shuffledData.length < 5) {
+        const recTr = await getRecommendedTrainings();
+        const enrichedRecTrainings = await Promise.all(recTr.map(async (item) => {
+          const user = await getUserById(item.userId);
+          return { ...item, name: user.documents[0].name, imageUrl: user.documents[0].imageUrl, from: 0, recommended: true };
+        }));
+
+        // Добавляем недостающие записи
+        const remainingCount = 20 - shuffledData.length;
+        const additionalData = enrichedRecTrainings.slice(0, remainingCount);
+
+        setCombinedData([...shuffledData, ...additionalData]);
+      } else {
+        setCombinedData(shuffledData);
+      }
+    };
+
+    fetchAllData();
+  }, [frList]);
+
 
   useEffect(() => {
     const fetchHot = async () => {
@@ -61,7 +171,6 @@ const Home = () => {
       const enrichedData = await Promise.all(data.map(async (item) => {
         if (item.creatorType === 0) {
           const userr = await getUserById(item.creator);
-          console.log('userr: ', userr.documents[0].name)
           return { ...item, name: userr.documents[0].name, imageUrl: userr.documents[0].imageUrl };
         } else if (item.creatorType === 1) {
           // Если creatorType === 1, делаем запрос getCommunityById
@@ -76,7 +185,6 @@ const Home = () => {
       setHot(enrichedData);
     };
 
-    console.log('hot: ', hot)
     fetchHot();
   }, []);
 
@@ -90,12 +198,53 @@ const Home = () => {
     }
   };
 
+  useEffect(() => {
+    async function fetchFriends() {
+      try {
+        const data = await getUserFriends(user.$id);
+        setFrList(data[0].friends);
+
+        const enriched = await Promise.all(data[0].friends.map(async (item) => {
+          const us = await getUserById(item);
+          return { userId: item, name: us.documents[0].name, imageUrl: us.documents[0].imageUrl };
+        }));
+
+        setFriends(enriched);
+      } catch (error) {
+        console.error('Error fetching user friends: ', error);
+      }
+    }
+
+    fetchFriends();
+  }, [user])
+
+
+  const getMinMax = (coordinates) => {
+    const xValues = coordinates.map(coord => coord.x);
+    const yValues = coordinates.map(coord => coord.y);
+
+    const minX = Math.min(...xValues);
+    const maxX = Math.max(...xValues);
+    const minY = Math.min(...yValues);
+    const maxY = Math.max(...yValues);
+
+    return { minX, maxX, minY, maxY };
+  };
+
+  const normalizeCoordinates = (coordinates, width, height) => {
+    const { minX, maxX, minY, maxY } = getMinMax(coordinates);
+
+    return coordinates.map(coord => {
+      const x = ((coord.x - minX) / (maxX - minX)) * width;
+      const y = height - (((coord.y - minY) / (maxY - minY)) * height);
+      return `${x},${y}`;
+    }).join(' ');
+  };
+
 
   useEffect(() => {
     fetchMealData();
   }, []);
-
-  console.log('mealForm:', mealForm)
 
   const [motivation, setMotivation] = useState([]);
 
@@ -141,7 +290,6 @@ const Home = () => {
       try {
         const res = await getUserCalendar(user.$id);
         setCalendar(res[0]);
-        console.log('calendar: ', calendar)
       } catch (err) {
       }
     };
@@ -149,6 +297,19 @@ const Home = () => {
     fetchCalendar();
   }, [user]);
 
+  useEffect(() => {
+    const fetchPlan = async () => {
+      try {
+        const res = await getCalendarPlan(calendar?.$id);
+        setPlan(res)
+      } catch (err) {
+      }
+    };
+
+    if (user) {
+      fetchPlan();
+    }
+  }, [calendar]);
 
   const outerScrollViewRef = useRef(null);
 
@@ -223,6 +384,39 @@ const Home = () => {
       console.error("Error refreshing data:", error);
     } finally {
       setRefreshing(false);
+    }
+  };
+
+  const formatTime = time => {
+    const hours = String(Math.floor(time / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((time % 3600) / 60)).padStart(2, '0');
+    const seconds = String(time % 60).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  };
+
+  const [lastTriggeredOffset, setLastTriggeredOffset] = useState(0);
+
+  const handleScrollY = (event) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+
+    if (offsetY >= lastTriggeredOffset + 800) {
+      alert('Скролл на 800 пикселей вниз!');
+      setLastTriggeredOffset(offsetY);
+    }
+  };
+
+  const calculatePace = (time, distance) => {
+    if (distance === 0) return "--:--";
+
+    const paceInMinutes = time / 60 / distance;
+    const minutes = Math.floor(paceInMinutes);
+    const seconds = Math.round((paceInMinutes - minutes) * 60);
+
+    if (time / 60 / distance < 200) {
+      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+    else {
+      return "--:--";
     }
   };
 
@@ -304,14 +498,84 @@ const Home = () => {
     fetchNotifs();
   }, []);
 
+
+  useEffect(() => {
+    const formattedRoutes = detail?.coordinates?.map(coord => [coord.x, coord.y]);
+    webRef?.current?.injectJavaScript(`flyToUserLocation({"latitude": ${detail?.coordinates[0]?.x}, "longitude": ${detail?.coordinates[0]?.y}});`);
+    webRef?.current?.injectJavaScript(`drawRoutes([${JSON.stringify(formattedRoutes)}]);`);
+  }, [detail, loaded])
+
+
+  const isLastUpdatedOld = (lastUpdated) => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1); // Устанавливаем дату на вчера
+    return new Date(lastUpdated) <= yesterday; // Сравниваем даты
+  };
+
+  const Graph = ({ coordinates }) => {
+    const width = 90;
+    const height = 90;
+
+    // Извлечение координат x и y
+    const xs = coordinates.map(coord => coord.x);
+    const ys = coordinates.map(coord => coord.y);
+
+    // Определение максимальных и минимальных значений
+    const xMin = Math.min(...xs);
+    const xMax = Math.max(...xs);
+    const yMin = Math.min(...ys);
+    const yMax = Math.max(...ys);
+
+    // Преобразуем координаты в относительные по размеру квадрата
+    const points = coordinates.map(coord => {
+      const x = ((coord.x - xMin) / (xMax - xMin)) * width; // Масштабируем x
+      const y = height - ((coord.y - yMin) / (yMax - yMin)) * height; // Инвертируем и масштабируем y
+      return `${x},${y}`;
+    }).join(' ');
+
+    return (
+      <Svg height={height} width={width}>
+        <Polyline
+          points={points}
+          stroke="#3c87ff"
+          strokeWidth="2"
+          fill="none"
+        />
+      </Svg>
+    );
+  };
+
+  const formatDate = (dateString) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInMs = now - date; // Разница во времени в миллисекундах
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60)); // Разница в минутах
+    const diffInHours = Math.floor(diffInMinutes / 60); // Разница в часах
+    const diffInDays = Math.floor(diffInMinutes / (60 * 24)); // Разница в днях
+    const diffInMonths = Math.floor(diffInDays / 30); // Разница в месяцах
+
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes}мин назад`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours}ч назад`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays}дн назад`;
+    } else {
+      const options = { month: 'long', day: 'numeric' };
+      const formattedDate = new Intl.DateTimeFormat('ru-RU', options).format(date);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${formattedDate}, ${hours}:${minutes}`;
+    }
+  };
+
   return (
     <ScrollView
-      ref={outerScrollViewRef}
-      onScroll={handleScroll}
       scrollEventThrottle={50} // Обновляем событие прокрутки каждые 50 мс
       contentOffset={{ y: width, x: 0 }}
-      snapToInterval={width}
       decelerationRate="fast"
+      className="h-[100vh]"
+      onScroll={handleScrollY}
     >
       <View className="bg-[#f3f7f8] h-[100vw] w-[100vw]">
         <Text className="font-pregular text-[16px] mt-8 mx-10 text-center">квадрат мотивации</Text>
@@ -322,7 +586,7 @@ const Home = () => {
 
         <ScrollView
           horizontal={true}
-          snapToInterval={width}
+          snapToInterval={10}
           decelerationRate="fast"
         >
           {motivation.map((item, index) =>
@@ -376,329 +640,885 @@ const Home = () => {
           )}
         </ScrollView>
       </View>
-      <ScrollView
-        className="h-full bg-[#000] pt-0"
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-      >
-        <View className="flex space-y-1">
-          <View className="h-[54vw] w-full p-0 flex items-center">
-            <Video
-              source={background}
-              className="w-full h-full mt-3 absolute top-0 m-0"
-              resizeMode={ResizeMode.COVER}
-              shouldPlay
-              isLooping
-              isMuted={true}
-            />
 
-            <TouchableOpacity onPress={() => { router.push('/additional/notifications') }} className="absolute top-4 right-4 bg-[#00000060] p-2 rounded-full">
-              <Image
-                source={icons.bell}
-                tintColor={'#fff'}
-                className="w-6 h-6"
-              />
-
-              {notificationsCount > 0 &&
-                (<View className="absolute bg-primary px-1 rounded-full right-[30px] top-0">
-                  <Text className="font-pbold text-[#fff] text-[16px]">{notificationsCount}</Text>
-                </View>)
-              }
-            </TouchableOpacity>
-
-            <TouchableOpacity activeOpacity={0.8} onPress={() => { router.push('/bookmark') }} className="bg-[#fff] relative m-2 top-[45vw] w-[83%] pt-[15px] pb-[19px] rounded-[21px] z-30">
-              <View className="flex flex-row items-center justify-center">
-                <Text className="text-center font-pregular text-[18px]">начать тренировку</Text>
-                <Image source={icons.play} tintColor={'#333'} className="w-[12px] h-[12px] ml-2 mb-[-4px]" />
-              </View>
-            </TouchableOpacity>
-
-
-            <LinearGradient className="h-[18vw] relative top-[17vw] w-full z-10" colors={['#fff0', '#000']}></LinearGradient>
-
-          </View>
-
-
-          <View>
-            <Text className="text-[16px] leading-[17px] mx-[16px] font-pregular relative text-[#838383] mt-[40px] text-center mb-4">здравствуй, чемпион! время идти на тренировку, всё, что не убивает, делает нас сильнее</Text>
-
-            <TouchableOpacity onPress={() => { router.push('/additional/calendar') }} className="flex flex-row justify-center items-center mb-3">
-              <Text className="text-xl font-pbold relative text-[#fff] text-center mb-1">календарь</Text>
-              <Image
-                className="w-[25px] h-[25px] ml-2"
-                source={icons.right}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity className="bg-[#111] mx-4 px-4 py-3 rounded-3xl">
-              <View className="flex flex-row justify-between">
-                {week.map((day, index) =>
-                  <View className="flex flex-row">
-                    <View className="flex items-center">
-                      <Text className={`font-pbold text-[19px] ${index === getCurrentWeekday() ? 'text-primary' : 'text-white'}`}>{day}</Text>
-
-                      {calendar?.days?.length > 0 && Array.isArray(calendar.days[index]) && (
-                        <>
-                          {calendar.days[index].map((plan, planIndex) => (
-                            <View key={planIndex}> {/* It's important to add a key for each element in a list */}
-                              <Image
-                                source={icons[plan.icon]}
-                                className="w-6 h-6 mt-2"
-                                tintColor={'#838383'}
-                              />
-                            </View>
-                          ))}
-                        </>
-                      )}
-
-                      {calendar?.repeaten?.length > 0 && (
-                        <>
-                          {calendar.repeaten.map((r, repeatIndex) => (
-                            <View key={repeatIndex}>
-                              {r.weekDays.includes(index) && (
-                                <Image
-                                  source={icons[r.plan.icon]}
-                                  className="w-6 h-6 mt-2"
-                                  tintColor={'#838383'}
-                                />
-                              )}
-                            </View>
-                          ))}
-                        </>
-                      )}
-                    </View>
-                    {index !== 6 && (
-                      <View className="bg-[#222] w-[2] rounded-xl ml-[13]"></View>
-                    )}
-                  </View>
-                )}
-              </View>
-            </TouchableOpacity>
-
-
-
-            <TouchableOpacity onPress={() => { router.push('/additional/trackers') }} className="flex flex-row justify-center items-center my-4">
-              <Text className="text-xl font-pbold relative text-[#fff] text-center">привычки</Text>
-              <Image
-                className="w-[25px] h-[25px] ml-2"
-                source={icons.right}
-              />
-            </TouchableOpacity>
-            <ScrollView horizontal={true}
-              snapToInterval={(width * 0.9225)} // Устанавливаем величину для "щелчка" на следующий элемент
-              decelerationRate="fast" // Быстрая инерция прокрутки
-              showsHorizontalScrollIndicator={false} // Отключаем горизонтальную полосу прокрутки
-              className="relative w-[100vw] h-[165px] rounded-3xl mb-2 pl-4">
-              {trackers.map(track => {
-                // Simplified content based on track.type
-                let content = {};
-                if (track.type === 0) { //  You need to define what type 0 represents
-                  content = { a: 'Default Text A', b: 'Default Text B' }; // Or handle it appropriately
-                } else if (track.type === 1) {
-                  content = { a: `воздержание ${track.name}`, b: `${track.done}/${track.goal} дней` };
-                } else if (track.type === 2) {
-                  content = { a: `пить воду ${track.name}`, b: `${track.done}/${track.goal} мл` };
-                }
-                else if (track.type === 3) {
-                  content = { a: `каждый день ${track.name}`, b: `${track.done}/${track.goal} дней` };
-                }
-                else {
-                  content = { a: `${track.name}`, b: '' }; // Handle unknown types gracefully
-                }
-
-
-                return (
-                  <TouchableOpacity
-                    key={track}
-                    onPress={() => navigation.navigate('additional/track', { track })} // Removed / from the route
-                    className="relative w-[90vw] mr-[3vw] h-[165px] bg-[#161616] rounded-3xl overflow-hidden mb-4"
-                  >
-                    <LinearGradient
-                      colors={colors[track.color]}
-                      className="relative w-[90vw] mr-[3vw] h-[165px] bg-[#161616] px-4 py-2 rounded-3xl overflow-hidden mb-4"
-                    >
-                      <Text className="text-white font-pbold text-[20px]">{content.a}</Text>
-                      <Text className="text-[#ffffff83] font-pregular text-[20px]">{content.b}</Text>
-
-
-                      {track.type === 1 && (
-                        <View className="absolute flex flex-row bottom-3 px-4 w-[90vw] justify-between">
-                          <TouchableOpacity className="w-[38.5%] py-[5px] bg-[#ffffff20] border-[1px] border-[#ffffff25] rounded-xl">
-                            <Text className="font-pregular text-white text-center text-[15px]">сорвался</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity className="w-[58.5%] py-[5px] bg-[#ffffff20] border-[1px] border-[#ffffff25] rounded-xl">
-                            <Text className="font-pregular text-white text-center text-[15px]">держусь</Text>
-                          </TouchableOpacity>
-                        </View>
-                      )}
-                    </LinearGradient>
-                  </TouchableOpacity>
-                );
-              })}
-
-              <TouchableOpacity className="pr-4" onPress={() => { router.push('/additional/newTrack') }}>
-                <View className="relative w-[90vw] mr-[3vw] h-[165px] bg-[#0b0b0b] px-4 py-2 rounded-3xl overflow-hidden mb-4">
-                  <Text className="text-[#838383] text-center font-pbold m-0 bg-[#131313] rounded-full mx-auto w-[64px] mt-[24px] h-[64px] text-[40px]">+</Text>
-                  <Text className="text-[#838383] text-center font-pregular text-[15px] mt-[8px]">создать трекер привычки</Text>
-                </View>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </View>
-
-        <Text className="text-xl font-pbold relative text-[#fff] text-center mt-2">топ публикаций</Text>
-        {hot
-          .sort((a, b) => b.indexShown - a.indexShown) // Cортируем по убыванию значения index
-          .map(item => {
-            return (
-              <TouchableOpacity
-                key={item.$id}
-                className="bg-[#111] pb-3 rounded-3xl mx-4 mt-4"
-              >
-                <View className="flex flex-row items-center">
-                  <Image
-                    source={{ uri: item.imageUrl }}
-                    className="w-[50px] h-[50px] mr-2s rounded-tl-3xl rounded-br-lg"
-                  />
-                  <Text className="text-white text-[20px] font-pbold mx-4">{item.name}</Text>
-                </View>
-                <Text className="text-white text-[20px] font-pbold mx-4">{item.title}</Text>
-                <Text className="text-white text-[18px] font-pregular mx-4">{item.caption}</Text>
-              </TouchableOpacity>
-            )
-          })}
-
-        {recsShown && (
-          <View className="bg-black w-[100vw] h-full top-0 z-10">
-            <TouchableOpacity className="absolute right-[16px] top-0" onPress={() => {
-              setRecsShown(false);
-              outerScrollViewRef.current.scrollTo({ y: openedFrom, animated: true });
-            }}>
-              <Image
-                source={icons.close}
-                className="w-8 h-8 top-8 right-0 mr-4 z-10 "
-                tintColor={'white'}
-              />
-            </TouchableOpacity>
+      {detailShown && (
+        <View className="bg-black w-[100vw] h-full fixed top-0 z-10">
+          <TouchableOpacity className="absolute right-[16px] top-0 z-20" onPress={() => { setDetailShown(false) }}>
             <Image
-              source={{ uri: current.imageUrl }}
-              className="w-[150] h-[150] rounded-full mx-auto mt-[8vh]"
+              source={icons.close}
+              className="w-8 h-8 top-8 right-0 mr-4 z-10 "
+              tintColor={'white'}
             />
-            <View className="flex flex-row justify-center mt-2">
-              <Text className="text-white font-pbold text-[25px] ml-4 mr-2">{current.name}</Text>
-              {current.isVerif && (
-                <Image
-                  source={icons.verify}
-                  className="w-7 h-7 mt-[6]"
-                />
+          </TouchableOpacity>
+
+          <Text className="text-[#838383] font-pregular text-[20px] mt-10 mx-4">{types[detail.typ].title}</Text>
+          {detail.distance > 0 && (
+            <>
+              <Text className="text-[#fff] font-pbold text-[48px] mx-4">{detail.distance}<Text className="text-[30px] text-[#838383]">км</Text></Text>
+              <Text className="text-[#838383] font-pregular text-[20px] my-1 mx-4">за</Text></>
+          )}
+          <Text className="text-[#fff] font-pbold text-[48px] mx-4">{formatTime(detail.time)}</Text>
+          <Text className="text-[#838383] font-pregular text-[20px] mt-1 mb-4 mx-4">через</Text>
+          <View className="bg-primary w-min mb-10">
+            <Text className="text-[#fff] font-pbold text-[48px] mx-4 mt-[-12px]">атлет</Text>
+          </View>
+
+          {detail.typ === 1 && (
+            <View className="bg-[#111] mx-4 py-3 rounded-3xl">
+              {detail.exercises.length > 0 && (
+                <Text className="text-[#fff] font-pbold text-[20px] mx-4">упражнения:</Text>
+              )}
+              {exercises.map(one =>
+                <View>
+                  {detail.exercises.includes(exercises.indexOf(one)) && (
+                    <Text className="text-[#fff] font-pregular text-[20px] mx-4 mt-1"><Text className="text-[#838383]">{exercises.indexOf(one) + 1}.</Text> {exercises[exercises.indexOf(one)].title}</Text>
+                  )}
+                </View>
               )}
             </View>
+          )}
 
-            <View className="flex flex-row justify-center">
-              <Text className="text-[#838383] font-pregular text-[20px] mt-0 mr-1">сообщество, {communities.find(rec => rec.$id === current.$id).users.length}</Text>
-              <Image
-                source={icons.profile}
-                className="h-5 w-5 mt-1"
-                tintColor={'#838383'}
+          {detail.coordinates.length > 0 && (
+            <View>
+              <WebView
+                ref={webRef}
+                style={{ marginTop: -8, marginLeft: -8 }}
+                originWhitelist={['*']}
+                source={{ html: mapTemplate }}
+                className="h-[100vw]"
+                onLoadEnd={() => { setLoaded(true) }}
               />
             </View>
+          )}
+        </View>
+      )}
 
-            {communities.find(rec => rec.$id === current.$id).users.includes(user.$id) ? (
-              <TouchableOpacity onPress={() => { setAlShown(true) }} className="bg-[#111] py-3 rounded-2xl mx-4 mt-4">
-                <Text className="text-[18px] text-white font-pregular text-center">покинуть</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity onPress={() => {
-                joinCommunity(current.$id, user.$id)
-                toggleUser(current.$id);
-              }} className="bg-white py-3 rounded-2xl mt-4 mx-4">
-                <Text className="text-[20px] text-black font-pregular text-center">вступить</Text>
-              </TouchableOpacity>
-            )}
+      <View>
+        <ScrollView
+          className="h-full bg-[#000] pt-0"
+          onScroll={handleScroll}
+        >
+          <View className="flex space-y-1">
+            <View className="h-[54vw] w-full p-0 flex items-center">
+              <Video
+                source={background}
+                className="w-full h-full mt-3 absolute top-0 m-0"
+                resizeMode={ResizeMode.COVER}
+                shouldPlay
+                isLooping
+                isMuted={true}
+              />
 
-            <Text className="text-white font-pbold text-[25px] mx-4 mt-4">лента</Text>
-            {
-              current.content.map(a => {
-                if (a.type === 0) {
-                  return (
-                    <View
-                      key={a}
-                      onPress={() => { }}
-                      className="relative mt-4 mr-[3vw] h-[165px] mx-4 bg-[#111] rounded-3xl overflow-hidden mb-4"
-                    >
-                      <Text className="text-white text-[18px] font-pregular mx-4 my-2">{a.content}</Text>
-                    </View>
-                  )
-                }
-                else if (a.type === 1) {
-                  return (
-                    <View
-                      key={a}
-                      onPress={() => { }}
-                      className="relative mt-4 mr-[3vw] h-[165px] mx-4 bg-[#111] rounded-3xl overflow-hidden mb-4"
-                    >
-                      <Text className="text-white text-[18px] font-pregular mx-4 my-2">{a.content}</Text>
-                    </View>
-                  )
-                }
-              })
-            }
-          </View>
-        )}
-
-        {communities.length > 0 && (
-          communities.map(item => (
-            <TouchableOpacity activeOpacity={1} className="bg-black" onPress={() => {
-              setCurrent(item);
-              setRecsShown(true);
-              outerScrollViewRef.current.scrollTo({ y: 400, animated: true });
-            }} key={item.id}>
-              <View className="flex flex-row justify-center items-center mb-4 mt-4">
+              <TouchableOpacity onPress={() => { router.push('/additional/notifications') }} className="absolute top-4 right-4 bg-[#00000060] p-2 rounded-full">
                 <Image
-                  className="w-[25px] h-[25px] mr-2 rounded-full"
-                  source={{ uri: item.imageUrl }}
+                  source={icons.bell}
+                  tintColor={'#fff'}
+                  className="w-6 h-6"
                 />
-                <Text className="text-xl font-pbold relative text-[#fff] text-center">{item.name}</Text>
+                {notificationsCount > 0 &&
+                  (<View className="absolute bg-primary px-1 rounded-full right-[30px] top-0">
+                    <Text className="font-pbold text-[#fff] text-[16px]">{notificationsCount}</Text>
+                  </View>)
+                }
+              </TouchableOpacity>
+
+              <TouchableOpacity activeOpacity={0.8} onPress={() => { router.push('/bookmark') }} className="bg-[#fff] relative m-2 top-[45vw] w-[83%] pt-[15px] pb-[19px] rounded-[21px] z-30">
+                <View className="flex flex-row items-center justify-center">
+                  <Text className="text-center font-pregular text-[18px]">начать тренировку</Text>
+                  <Image source={icons.play} tintColor={'#333'} className="w-[12px] h-[12px] ml-2 mb-[-4px]" />
+                </View>
+              </TouchableOpacity>
+              <LinearGradient className="h-[18vw] relative top-[17vw] w-full z-10" colors={['#fff0', '#000']}></LinearGradient>
+            </View>
+
+            <View>
+              <Text className="text-[16px] leading-[17px] mx-[16px] font-pregular relative text-[#838383] mt-[46px] text-center mb-1">атлет — бета-версия</Text>
+              <TouchableOpacity onPress={() => { router.push('/additional/calendar') }} className="flex flex-row justify-center items-center mb-3">
+                <Text className="text-xl font-pbold relative text-[#fff] text-center mb-1">календарь</Text>
                 <Image
                   className="w-[25px] h-[25px] ml-2"
                   source={icons.right}
                 />
-              </View>
+              </TouchableOpacity>
+              <TouchableOpacity className="bg-[#111] mx-4 px-4 py-3 rounded-3xl">
+                <View className="flex flex-row justify-between">
+                  {week.map((day, index) => {
+                    const today = new Date();
+                    const dayOfWeek = today.getDay();
+                    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Если сегодня воскресенье (0), смещаем на -6 дней
+                    const mondayDate = new Date(today);
+                    mondayDate.setDate(today.getDate() + mondayOffset);
+                    const currentDate = mondayDate.getDate() + index;
+                    return (
+                      <View className="flex flex-row">
+                        <View className="flex items-center">
+                          <Text className={`font-pbold text-[19px] ${index === getCurrentWeekday() ? 'text-primary' : 'text-white'}`}>{day}</Text>
 
+                          {calendar?.days?.length > 0 && Array.isArray(calendar.days[index]) && (
+                            <>
+                              {calendar.days[index].map((plan, planIndex) => (
+                                <View key={planIndex}> {/* It's important to add a key for each element in a list */}
+                                  <Image
+                                    source={icons[plan.icon]}
+                                    className="w-6 h-6 mt-2"
+                                    tintColor={'#838383'}
+                                  />
+                                </View>
+                              ))}
+                            </>
+                          )}
+
+                          {plan.map((singlePlan, j) => (
+                            new Date(singlePlan.date).getDate() === currentDate && (
+                              <View
+                                key={`single-${j}`}
+                              >
+                                <Image
+                                  source={icons[singlePlan.icon]}
+                                  className="w-6 h-6 mt-2"
+                                  tintColor={'#838383'}
+                                />
+                              </View>
+                            )
+                          ))}
+
+                          {calendar?.repeaten?.length > 0 && (
+                            <>
+                              {calendar.repeaten.map((r, repeatIndex) => (
+                                <View key={repeatIndex}>
+                                  {r.weekDays.includes(index) && (
+                                    <Image
+                                      source={icons[r.plan.icon]}
+                                      className="w-6 h-6 mt-2"
+                                      tintColor={'#838383'}
+                                    />
+                                  )}
+                                </View>
+                              ))}
+                            </>
+                          )}
+                        </View>
+                        {index !== 6 && (
+                          <View className="bg-[#222] w-[2] rounded-xl ml-[13]"></View>
+                        )}
+                      </View>)
+                  })}
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => { router.push('/additional/trackers') }} className="flex flex-row justify-center items-center my-4">
+                <Text className="text-xl font-pbold relative text-[#fff] text-center">привычки</Text>
+                <Image
+                  className="w-[25px] h-[25px] ml-2"
+                  source={icons.right}
+                />
+              </TouchableOpacity>
               <ScrollView horizontal={true}
-                snapToInterval={(width * 0.9225)}
-                decelerationRate="fast"
-                showsHorizontalScrollIndicator={false}
+                snapToInterval={(width * 0.9225)} // Устанавливаем величину для "щелчка" на следующий элемент
+                decelerationRate="fast" // Быстрая инерция прокрутки
+                showsHorizontalScrollIndicator={false} // Отключаем горизонтальную полосу прокрутки
                 className="relative w-[100vw] h-[165px] rounded-3xl mb-2 pl-4">
-                {item.content.map(a => {
-                  if (a.type === 0) {
-                    return (
-                      <View
-                        key={a}
-                        onPress={() => { }}
-                        className="relative w-[90vw] mr-[3vw] h-[165px] bg-[#161616] rounded-3xl overflow-hidden mb-4"
-                      >
-                        <Text className="text-white text-[18px] font-pregular mx-4 my-2">{a.content}</Text>
-                      </View>
-                    )
+                {trackers.map(track => {
+                  // Simplified content based on track.type
+                  let content = {};
+                  if (track.type === 0) { //  You need to define what type 0 represents
+                    content = { a: 'Default Text A', b: 'Default Text B' }; // Or handle it appropriately
+                  } else if (track.type === 1) {
+                    content = { a: `воздержание ${track.name}`, b: `${track.done}/${track.goal} дней` };
+                  } else if (track.type === 2) {
+                    content = { a: `пить воду ${track.name}`, b: `${track.done}/${track.goal} мл` };
                   }
-                  else if (a.type === 1) {
-                    return (
-                      <View
-                        key={a}
-                        onPress={() => { }}
-                        className="relative w-[90vw] mr-[3vw] h-[165px] bg-[#161616] rounded-3xl overflow-hidden mb-4"
-                      >
-                        <Text className="text-white text-[18px] font-pregular mx-4 my-2">{a.content}</Text>
-                      </View>
-                    )
+                  else if (track.type === 3) {
+                    content = { a: `каждый день ${track.name}`, b: `${track.done}/${track.goal} дней` };
                   }
-                }
-                )}
+                  else {
+                    content = { a: `${track.name}`, b: '' }; // Handle unknown types gracefully
+                  }
+
+
+                  return (
+                    <TouchableOpacity
+                      key={track}
+                      onPress={() => navigation.navigate('additional/track', { track })} // Removed / from the route
+                      className="relative w-[90vw] mr-[3vw] h-[165px] bg-[#161616] rounded-3xl overflow-hidden mb-4"
+                    >
+                      <LinearGradient
+                        colors={colors[track.color]}
+                        className="relative w-[90vw] mr-[3vw] h-[165px] bg-[#161616] px-4 py-2 rounded-3xl overflow-hidden mb-4"
+                      >
+                        <Text className="text-white font-pbold text-[20px]">{content.a}</Text>
+                        <Text className="text-[#ffffff83] font-pregular text-[20px]">{content.b}</Text>
+
+                        {([1, 3].includes(track.type) && track.today === 0 && isLastUpdatedOld(track.$updatedAt)) && (
+                          <View className="absolute flex flex-row bottom-3 px-4 w-[90vw] justify-between">
+                            <TouchableOpacity
+                              onPress={() => {
+                                var toSend = {
+                                  id: track.$id,
+                                  done: track.done,
+                                  today: 1,
+                                }
+                                updateTracker(toSend);
+                              }}
+                              className="w-[38.5%] py-[5px] bg-[#ffffff20] border-[1px] border-[#ffffff25] rounded-xl">
+                              <Text className="font-pregular text-white text-center text-[15px]">сорвался</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              onPress={() => {
+                                var toSend = {
+                                  id: track.$id,
+                                  done: track.done + 1,
+                                  today: 2,
+                                }
+                                updateTracker(toSend);
+                              }}
+                              className="w-[58.5%] py-[5px] bg-[#ffffff20] border-[1px] border-[#ffffff25] rounded-xl">
+                              <Text className="font-pregular text-white text-center text-[15px]">продержался</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+
+                        {([2].includes(track.type) && !track.todayDone) && (
+                          <View className="absolute flex flex-row bottom-3 px-4 w-[90vw] justify-between">
+                            <TouchableOpacity
+                              onPress={() => {
+                                var toSend = {
+                                  id: track.$id,
+                                  done: track.done + 100,
+                                }
+                                updateTracker(toSend);
+                              }}
+                              className="w-full py-[5px] bg-[#ffffff20] border-[1px] border-[#ffffff25] rounded-xl">
+                              <Text className="font-pregular text-white text-center text-[15px]">+100 милилитров</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  );
+                })}
+
+
+
+                <TouchableOpacity className="pr-4" onPress={() => { router.push('/additional/newTrack') }}>
+                  <View className="relative w-[90vw] mr-[3vw] h-[165px] bg-[#0b0b0b] px-4 py-2 rounded-3xl overflow-hidden mb-4">
+                    <Text className="text-[#838383] text-center font-pbold m-0 bg-[#131313] rounded-full mx-auto w-[64px] mt-[24px] h-[64px] text-[40px]">+</Text>
+                    <Text className="text-[#838383] text-center font-pregular text-[15px] mt-[8px]">создать трекер привычки</Text>
+                  </View>
+                </TouchableOpacity>
               </ScrollView>
-            </TouchableOpacity>
-          ))
-        )}
-      </ScrollView>
+            </View>
+          </View>
+
+          <Text className="text-xl font-pbold relative text-[#fff] text-center mt-2">лента</Text>
+          {combinedData.map(d => {
+            if (d.from === 0) {
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    if (shareShown !== true && moreShown !== true) {
+                      setDetail(d);
+                      setDetailShown(true);
+                      outerScrollViewRef.current.scrollTo({ y: width, animated: true });
+                    }
+                  }}
+                  className="bg-[#111] py-3 rounded-3xl mx-4 mt-4">
+                  <TouchableOpacity
+                    className="bg-[#ffffff0f] w-8 h-8 absolute right-4 top-4 flex justify-center items-center rounded-xl z-[1]"
+                    onPress={() => {
+                      setMore(d);
+                      setMoreShown(true);
+                    }}
+                  >
+                    <Image
+                      source={icons.dots}
+                      className="w-6 h-6"
+                      tintColor={'#838383'}
+                    />
+                  </TouchableOpacity>
+
+                  {moreShown && more === d && (
+                    <View className="w-[50vw] bg-[#222] absolute right-4 top-[20px] z-20 py-3 px-4 rounded-2xl">
+                      <TouchableOpacity
+                        onPress={() => {
+                          setMoreShown(false);
+                        }}
+                      >
+                        <Image
+                          source={icons.close}
+                          tintColor={'#838383'}
+                          className="w-6 h-6 absolute right-0"
+                        />
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={() => {
+                          setMoreShown(false);
+                          setShareShown(true);
+                        }}
+                        className="mt-6">
+                        <Text className="text-white text-[18px] font-pregular">поделиться</Text>
+                      </TouchableOpacity>
+                      {more.typ === 1 && (<>
+                        <View className="h-[2px] w-full bg-[#333] rounded-xl my-2"></View>
+
+                        <TouchableOpacity
+                          onPress={() => navigation.navigate('bookmark', { items: d?.exercises })}
+                        >
+                          <Text className="text-white text-[18px] font-pregular leading-[21px]">добавить эти упражнения в трекер</Text>
+                        </TouchableOpacity></>
+                      )}
+                    </View>
+                  )}
+
+                  {shareShown && more === d && (
+                    <View className="w-[70vw] bg-[#222] absolute right-4 top-[20px] z-20 py-3 px-4 rounded-2xl">
+                      <TouchableOpacity
+                        onPress={() => {
+                          setMoreShown(false);
+                          setShareShown(false);
+                        }}
+                      >
+                        <Image
+                          source={icons.close}
+                          tintColor={'#838383'}
+                          className="w-6 h-6 absolute right-0"
+                        />
+                      </TouchableOpacity>
+
+                      <Text className="text-white text-[18px] font-pregular">отправь другу</Text>
+                      {friends.length > 0 ? (
+                        <View>
+                          <ScrollView
+                            horizontal={true}
+                          >
+                            {friends?.map(friend =>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  const updatedFriends = friends.map(fr => {
+                                    if (fr.userId === friend.userId) {
+                                      return {
+                                        ...fr,
+                                        added: true,
+                                      };
+                                    }
+                                    return fr; // Возвращаем объект без изменений
+                                  });
+
+                                  const removedFriends = friends.map(fr => {
+                                    if (fr.userId === friend.userId) {
+                                      return {
+                                        ...fr,
+                                        added: false,
+                                      };
+                                    }
+                                    return fr; // Возвращаем объект без изменений
+                                  });
+
+                                  if (friend.added === true) {
+                                    setFriends(removedFriends);
+                                  } else {
+                                    setFriends(updatedFriends);
+                                  }
+                                }}
+                              >
+                                <View className={`${friend.added && 'bg-white'} h-[56px] w-[56px] rounded-full mt-3 flex justify-center items-center mx-1`}>
+                                  <Image
+                                    source={{ uri: friend.imageUrl }}
+                                    className={`h-[52px] w-[52px] rounded-full`}
+                                  />
+                                </View>
+                                <Text className={`${friend.added ? 'text-[#fff]' : 'text-[#838383]'} text-[12px] font-pregular text-center`}>{friend.name.split(' ')[0]}</Text>
+                              </TouchableOpacity>
+                            )}
+                          </ScrollView>
+
+                          <TouchableOpacity
+                            onPress={() => {
+                              const nfs = friends.filter(item => item.added).map(f => {
+                                return {
+                                  sentTo: f.userId,
+                                  sentBy: 0,
+                                  sentById: user.$id,
+                                  title: `${types[d.typ].title} - тренировка`,
+                                  contentId: d.$id,
+                                  type: 5,
+                                };
+                              });
+
+                              nfs.forEach(form => {
+                                sendNotification(form);
+                              });
+
+                              setShareShown(false);
+                              setMoreShown(false);
+                            }}
+
+                            className={`${friends.some(item => item.added) ? 'bg-white' : 'bg-[#333]'} py-2 rounded-2xl mt-4`}>
+                            <Text className={`${friends.some(item => item.added) ? 'text-black' : 'text-[#838383]'} text-center text-[18px] font-pregular`}>отправить</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <Text className="text-[#838383] text-[18px] font-pregular">ты пока никого не добавил :(</Text>
+                      )}
+                    </View>
+                  )}
+
+                  <View className="flex flex-row mx-4">
+                    <Image
+                      source={{ uri: d.imageUrl }}
+                      className="w-[52px] h-[52px] rounded-xl mr-3"
+                    />
+                    <View className="flex flex-col">
+                      <Text className="text-white mr-4 text-[19px] font-pbold">{d.name}</Text>
+                      <Text className="text-[#838383] mr-4 text-[17px] font-pregular">{types[d.typ]?.title}, {formatDate(d.$createdAt)}</Text>
+                    </View>
+                  </View>
+
+                  {d.description?.length > 0 && (
+                    <Text className="text-[#838383] mx-4 text-[17px] mt-4 font-pregular">{d.description}</Text>
+                  )}
+
+                  <View className="mx-4 h-[2px] bg-[#222] rounded-xl my-4"></View>
+
+                  <View className="flex flex-row justify-between mx-4">
+                    <View className="">
+                      <Text className="font-pregular text-[#838383] text-[17px]">время</Text>
+                      <Text className="font-pregular text-[#fff] text-[17px]">{formatTime(d.time)}</Text>
+                    </View>
+
+                    {d.distance > 0 && (
+                      <View>
+                        <Text className="font-pregular text-[#838383] text-[17px]">темп</Text>
+                        <Text className="font-pregular text-[#fff] text-[17px]">{calculatePace(d.time, d.distance)}/км</Text>
+                      </View>
+                    )}
+
+                    {d.distance > 0 && (
+                      <View>
+                        <Text className="font-pregular text-[#838383] text-[17px]">дистанция</Text>
+                        <Text className="font-pregular text-[#fff] text-[17px]">{d.distance}км</Text>
+                      </View>
+                    )}
+
+                    {d.exercises.length > 0 && (
+                      <View>
+                        <Text className="font-pregular text-[#838383] text-[17px]">упражнений</Text>
+                        <Text className="font-pregular text-[#fff] text-[17px]">{d.exercises.length}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {//<View className="mx-4 h-[2px] bg-[#222] rounded-xl mt-4 mb-3"></View>
+                  }
+
+                  {d.typ === 0 && (
+                    <View className="mt-4">
+                      {d.coordinates.length > 1 && (
+                        <><View className="flex flex-row justify-between">
+                          <View>
+                            <Text className="font-pregular text-[#838383] text-[17px] mx-4">скорость</Text>
+                            <Text className="text-white mx-4 text-[17px] font-pregular">{(d.distance / d.time * 3600).toFixed(1)}км/ч</Text>
+                            <Text className="font-pregular text-[#838383] text-[17px] mx-4 mt-4">сложность</Text>
+                            <Text className="text-white mx-4 text-[17px] font-pregular">{d.effort ? d.effort : '--'}/10</Text>
+                          </View>
+                          <View>
+                            <Text className="font-pregular text-[#838383] text-[17px] mx-4">активность</Text>
+                            <Text className="text-white mx-4 text-[17px] font-pregular">+{(d.time / 30).toFixed()}</Text>
+                            <Text className="font-pregular text-[#838383] text-[17px] mx-4 mt-4">сжёг</Text>
+                            <Text className="text-white mx-4 text-[17px] font-pregular">{((d.distance / d.time * 3600) * d.distance * 12).toFixed()}ккал</Text>
+                          </View>
+
+                          <View style={{ width: 90, height: 90 }}
+                            className="mt-4 mx-4 mb-2 "
+                          >
+                            <Graph coordinates={d.coordinates} />
+                          </View>
+                        </View>
+                          {//<View className="w-full h-[200px]">
+                            // <WebView
+                            // ref={webRef}
+                            //style={{ marginTop: -8, marginLeft: -8 }}
+                            //  originWhitelist={['*']}
+                            //source={{ html: mapTemplate }} />
+                            //</View>
+                          }
+                        </>
+                      )}
+                    </View>
+                  )}
+
+
+                  {d.exercises.length > 0 && (
+                    <>
+
+                      <Text className="text-[#838383] font-pregular mx-4 text-[17px]">упражнения</Text>
+
+                      {d.exercises.length > 5 ? (
+                        <>
+                          {d.exercises.slice(0, 5).map((exe, index) => (
+                            <Text className="text-white font-pregular mx-4 mt-1 text-[17px]" key={exe}><Text className="text-[#838383]">{index + 1}.</Text> {exercises[exe].title}</Text>
+                          ))}
+                          <Text className="text-[#838383] font-pregular mx-4 mt-1 text-[17px]">показать все...</Text>
+                        </>
+                      ) : (<>
+                        {d.exercises.map((exe, index) => (
+                          <Text className="text-white font-pregular mx-4 mt-1 text-[17px]" key={exe}><Text className="text-[#838383]">{index + 1}.</Text> {exercises[exe].title}</Text>
+                        ))}</>
+                      )}
+                    </>
+                  )}
+
+                </TouchableOpacity>
+              );
+            }
+
+            else if (d.from === 1) {
+              return (
+                <TouchableOpacity className="bg-[#111] py-3 rounded-3xl mx-4 mt-4">
+                  <TouchableOpacity
+                    className="bg-[#ffffff0f] w-8 h-8 absolute right-4 top-4 flex justify-center items-center rounded-xl"
+                    onPress={() => {
+                      setMore(d);
+                      setMoreShown(true);
+                    }}
+                  >
+                    <Image
+                      source={icons.dots}
+                      className="w-6 h-6"
+                      tintColor={'#838383'}
+                    />
+                  </TouchableOpacity>
+
+                  {moreShown && more === d && (
+                    <View className="w-[50vw] bg-[#222] absolute right-4 top-[20px] z-20 py-3 px-4 rounded-2xl">
+                      <TouchableOpacity
+                        onPress={() => {
+                          setMoreShown(false);
+                        }}
+                      >
+                        <Image
+                          source={icons.close}
+                          tintColor={'#838383'}
+                          className="w-6 h-6 absolute right-0"
+                        />
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={() => {
+                          setMoreShown(false);
+                          setShareShown(true);
+                        }}
+                        className="mt-6">
+                        <Text className="text-white text-[18px] font-pregular">поделиться</Text>
+                      </TouchableOpacity>
+                      {more.typ === 1 && (<>
+                        <View className="h-[2px] w-full bg-[#333] rounded-xl my-2"></View>
+
+                        <TouchableOpacity
+                          onPress={() => navigation.navigate('bookmark', { items: d?.exercises })}
+                        >
+                          <Text className="text-white text-[18px] font-pregular leading-[21px]">добавить эти упражнения в трекер</Text>
+                        </TouchableOpacity></>
+                      )}
+                    </View>
+                  )}
+
+                  {shareShown && more === d && (
+                    <View className="w-[70vw] bg-[#222] absolute right-4 top-[20px] z-20 py-3 px-4 rounded-2xl">
+                      <TouchableOpacity
+                        onPress={() => {
+                          setMoreShown(false);
+                          setShareShown(false);
+                        }}
+                      >
+                        <Image
+                          source={icons.close}
+                          tintColor={'#838383'}
+                          className="w-6 h-6 absolute right-0"
+                        />
+                      </TouchableOpacity>
+
+                      <Text className="text-white text-[18px] font-pregular">отправь другу</Text>
+                      {friends.length > 0 ? (
+                        <View>
+                          <ScrollView
+                            horizontal={true}
+                          >
+                            {friends?.map(friend =>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  const updatedFriends = friends.map(fr => {
+                                    if (fr.userId === friend.userId) {
+                                      return {
+                                        ...fr,
+                                        added: true,
+                                      };
+                                    }
+                                    return fr; // Возвращаем объект без изменений
+                                  });
+
+                                  const removedFriends = friends.map(fr => {
+                                    if (fr.userId === friend.userId) {
+                                      return {
+                                        ...fr,
+                                        added: false,
+                                      };
+                                    }
+                                    return fr; // Возвращаем объект без изменений
+                                  });
+
+                                  if (friend.added === true) {
+                                    setFriends(removedFriends);
+                                  } else {
+                                    setFriends(updatedFriends);
+                                  }
+                                }}
+                              >
+                                <View className={`${friend.added && 'bg-white'} h-[56px] w-[56px] rounded-full mt-3 flex justify-center items-center mx-1`}>
+                                  <Image
+                                    source={{ uri: friend.imageUrl }}
+                                    className={`h-[52px] w-[52px] rounded-full`}
+                                  />
+                                </View>
+                                <Text className={`${friend.added ? 'text-[#fff]' : 'text-[#838383]'} text-[12px] font-pregular text-center`}>{friend.name.split(' ')[0]}</Text>
+                              </TouchableOpacity>
+                            )}
+                          </ScrollView>
+
+                          <TouchableOpacity
+                            onPress={() => {
+                              const nfs = friends.filter(item => item.added).map(f => {
+                                return {
+                                  sentTo: f.userId,
+                                  sentBy: 0,
+                                  sentById: user.$id,
+                                  title: `${types[tr.typ].title} - тренировка`,
+                                  contentId: tr.$id,
+                                  type: 5,
+                                };
+                              });
+
+                              nfs.forEach(form => {
+                                sendNotification(form);
+                              });
+
+                              setShareShown(false);
+                              setMoreShown(false);
+                            }}
+
+                            className={`${friends.some(item => item.added) ? 'bg-white' : 'bg-[#333]'} py-2 rounded-2xl mt-4`}>
+                            <Text className={`${friends.some(item => item.added) ? 'text-black' : 'text-[#838383]'} text-center text-[18px] font-pregular`}>отправить</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <Text className="text-[#838383] text-[18px] font-pregular">ты пока никого не добавил :(</Text>
+                      )}
+                    </View>
+                  )}
+
+                  <View className="flex flex-row mx-4">
+                    <Image
+                      source={{ uri: d.imageUrl }}
+                      className="w-[52px] h-[52px] rounded-xl mr-3"
+                    />
+                    <View className="flex flex-col">
+                      <Text className="text-white mr-4 text-[19px] font-pbold">{d.name}</Text>
+                      <Text className="text-[#838383] mr-4 text-[17px] font-pregular">{formatDate(d.$createdAt)}</Text>
+                    </View>
+                  </View>
+
+                  <Text className="text-[#fff] mx-4 text-[17px] mt-4 font-pregular">{d.caption}</Text>
+                </TouchableOpacity>
+              )
+            }
+
+            else if (d.from === 2) {
+              return (
+                <TouchableOpacity className="bg-[#111] py-3 rounded-3xl mx-4 mt-4">
+                  {moreShown && more === d && (
+                    <View className="w-[50vw] bg-[#222] absolute right-4 top-[20px] z-20 py-3 px-4 rounded-2xl">
+                      <TouchableOpacity
+                        onPress={() => {
+                          setMoreShown(false);
+                        }}
+                      >
+                        <Image
+                          source={icons.close}
+                          tintColor={'#838383'}
+                          className="w-6 h-6 absolute right-0"
+                        />
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={() => {
+                          setMoreShown(false);
+                          setShareShown(true);
+                        }}
+                        className="mt-6">
+                        <Text className="text-white text-[18px] font-pregular">поделиться</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
+                  {shareShown && more === d && (
+                    <View className="w-[70vw] bg-[#222] absolute right-4 top-[20px] z-20 py-3 px-4 rounded-2xl">
+                      <TouchableOpacity
+                        onPress={() => {
+                          setMoreShown(false);
+                          setShareShown(false);
+                        }}
+                      >
+                        <Image
+                          source={icons.close}
+                          tintColor={'#838383'}
+                          className="w-6 h-6 absolute right-0"
+                        />
+                      </TouchableOpacity>
+
+                      <Text className="text-white text-[18px] font-pregular">отправь другу</Text>
+                      {friends.length > 0 ? (
+                        <View>
+                          <ScrollView
+                            horizontal={true}
+                          >
+                            {friends?.map(friend =>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  const updatedFriends = friends.map(fr => {
+                                    if (fr.userId === friend.userId) {
+                                      return {
+                                        ...fr,
+                                        added: true,
+                                      };
+                                    }
+                                    return fr; // Возвращаем объект без изменений
+                                  });
+
+                                  const removedFriends = friends.map(fr => {
+                                    if (fr.userId === friend.userId) {
+                                      return {
+                                        ...fr,
+                                        added: false,
+                                      };
+                                    }
+                                    return fr; // Возвращаем объект без изменений
+                                  });
+
+                                  if (friend.added === true) {
+                                    setFriends(removedFriends);
+                                  } else {
+                                    setFriends(updatedFriends);
+                                  }
+                                }}
+                              >
+                                <View className={`${friend.added && 'bg-white'} h-[56px] w-[56px] rounded-full mt-3 flex justify-center items-center mx-1`}>
+                                  <Image
+                                    source={{ uri: friend.imageUrl }}
+                                    className={`h-[52px] w-[52px] rounded-full`}
+                                  />
+                                </View>
+                                <Text className={`${friend.added ? 'text-[#fff]' : 'text-[#838383]'} text-[12px] font-pregular text-center`}>{friend.name.split(' ')[0]}</Text>
+                              </TouchableOpacity>
+                            )}
+                          </ScrollView>
+
+                          <TouchableOpacity
+                            onPress={() => {
+                              const nfs = friends.filter(item => item.added).map(f => {
+                                return {
+                                  sentTo: f.userId,
+                                  sentBy: 0,
+                                  sentById: user.$id,
+                                  title: `${types[tr.typ].title} - тренировка`,
+                                  contentId: tr.$id,
+                                  type: 5,
+                                };
+                              });
+
+                              nfs.forEach(form => {
+                                sendNotification(form);
+                              });
+
+                              setShareShown(false);
+                              setMoreShown(false);
+                            }}
+
+                            className={`${friends.some(item => item.added) ? 'bg-white' : 'bg-[#333]'} py-2 rounded-2xl mt-4`}>
+                            <Text className={`${friends.some(item => item.added) ? 'text-black' : 'text-[#838383]'} text-center text-[18px] font-pregular`}>отправить</Text>
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <Text className="text-[#838383] text-[18px] font-pregular">ты пока никого не добавил :(</Text>
+                      )}
+                    </View>
+                  )}
+
+
+                  <TouchableOpacity
+                    className="bg-[#ffffff0f] w-8 h-8 absolute right-4 top-4 flex justify-center items-center rounded-xl"
+                    onPress={() => {
+                      setMore(d);
+                      setMoreShown(true);
+                    }}
+                  >
+                    <Image
+                      source={icons.dots}
+                      className="w-6 h-6"
+                      tintColor={'#838383'}
+                    />
+                  </TouchableOpacity>
+
+                  <View className="flex flex-row mx-4">
+                    <Image
+                      source={{ uri: d.imageUrl }}
+                      className="w-[52px] h-[52px] rounded-xl mr-3"
+                    />
+                    <View className="flex flex-col items-start">
+                      <View className="flex flex-row">
+                        <Text className="text-white mr-2 text-[19px] font-pbold">{d.name}</Text>
+                        {d.verif && (
+                          <Image
+                            source={icons.verify}
+                            className="w-5 h-5 mt-1"
+                          />)}
+                      </View>
+                      <Text className="text-[#838383] mr-4 text-[17px] font-pregular">{formatDate(d.$createdAt)}</Text>
+                    </View>
+                  </View>
+
+                  <Text className="text-[#fff] mx-4 mt-4 text-[17px] font-pregular">{d.content}</Text>
+                </TouchableOpacity>
+              )
+            }
+          })}
+
+          {combinedData.length === 0 && (
+            <View>
+              <ActivityIndicator
+                animating={true}
+                color="#fff"
+                size={50}
+                className="mt-4"
+              />
+            </View>
+          )}
+
+          {combinedData.length > 0 && (
+            <View>
+              <ActivityIndicator
+                animating={true}
+                color="#fff"
+                size={50}
+                className="mt-10"
+              />
+            </View>
+          )}
+          <View
+            className="mt-[70vh]"
+          ></View>
+        </ScrollView>
+      </View>
     </ScrollView>
   );
 };

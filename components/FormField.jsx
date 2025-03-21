@@ -21,7 +21,11 @@ const FormField = ({
     <View className={`${otherStyles}`}>
       <Text className="text-[19px] text-[#838383] font-pbold mb-1">{title}</Text>
 
-      <View className="w-full h-[56px] px-4 bg-[#111] rounded-2xl border-2 border-[#222] focus:border-[#3c87ff] flex flex-row items-center">
+      <View
+        style={{
+          height: multiline ? numberOfStrokes * 40 + 16 : 56,
+        }}
+        className='w-full px-4 bg-[#111] rounded-2xl border-2 border-[#222] focus:border-[#3c87ff] flex flex-row items-center'>
         <TextInput
           className="flex-1 text-[#fff] font-psemibold text-base"
           value={value}

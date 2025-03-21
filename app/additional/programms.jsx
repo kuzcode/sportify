@@ -153,7 +153,7 @@ const Programms = () => {
         )}
 
         {programmShown && (
-            <View className="bg-[#000] w-full h-full absolute top-0 left-0 z-20 px-4">
+            <ScrollView className="bg-[#000] w-full h-full absolute top-0 left-0 z-20 px-4">
                 <View className="flex flex-row items-center mt-10 justify-center">
                     <Text className="text-white font-pbold text-[19px] text-center mx-[30px]">{currentpr.name}</Text>
                     <TouchableOpacity
@@ -182,15 +182,17 @@ const Programms = () => {
                         </View>
                     ))}
 
+                <View className="mt-[13vh]"></View>
+
                 <TouchableOpacity
                     onPress={() => {
                         setProgramm();
                         router.push('/home')
                     }}
-                    className="bg-white pb-3 pt-1 rounded-2xl absolute bottom-10 w-full left-4">
+                    className="bg-white pb-3 pt-1 rounded-2xl absolute bottom-10 left-4 right-4">
                     <Text className="text-black font-pregular text-[20px] mt-1 text-center">применить</Text>
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
         )}
 
 

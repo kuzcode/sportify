@@ -9,6 +9,8 @@ import { icons } from "../../constants";
 import { LineChart } from 'react-native-chart-kit';
 import { exercises } from "../../constants/exercises";
 import { FormField } from "../../components";
+import WebView from 'react-native-webview';
+import mapTemplate from '../map-template';
 
 const Profile = () => {
   const router = useRouter();
@@ -35,6 +37,7 @@ const Profile = () => {
     ]
   })
 
+  const webRef = useRef(null);
 
   useEffect(() => {
     async function fetchWeeklyReport() {
@@ -43,8 +46,9 @@ const Profile = () => {
           userId: user?.$id,
           weight: 0
         });
-        setTosave(gotWeekly.weight[gotWeekly.weight.length - 1].val)
-        setWeekly(gotWeekly)
+        setTosave(gotWeekly.weight[gotWeekly.weight.length - 1].val);
+        setWeekly(gotWeekly);
+        console.log(gotWeekly);
       } catch (error) {
         console.error('Error fetching weekly report: ', error);
       }
@@ -112,7 +116,7 @@ const Profile = () => {
     };
 
     fetchUserPosts();
-  }, [user.$id]);
+  }, [user]);
 
   useEffect(() => {
     const fetchCompletedDocuments = async () => {
@@ -223,6 +227,12 @@ const Profile = () => {
     }
   }, [completed]);
 
+  useEffect(() => {
+    const formattedRoutes = detail?.coordinates?.map(coord => [coord.x, coord.y]);
+    webRef?.current?.injectJavaScript(`flyToUserLocation({"latitude": ${detail?.coordinates[0]?.x}, "longitude": ${detail?.coordinates[0]?.y}});`);
+    webRef?.current?.injectJavaScript(`drawRoutes([${JSON.stringify(formattedRoutes)}]);`);
+  }, [detail])
+
   const formatTime = time => {
     const hours = String(Math.floor(time / 3600)).padStart(2, '0');
     const minutes = String(Math.floor((time % 3600) / 60)).padStart(2, '0');
@@ -285,6 +295,18 @@ const Profile = () => {
             <Text className="text-[#fff] font-pbold text-[48px] mx-4 mt-[-12px]">атлет</Text>
           </View>
 
+          {detail.coordinates.length > 0 && (
+            <View>
+              <WebView
+                ref={webRef}
+                style={{ marginTop: -8, marginLeft: -8 }}
+                originWhitelist={['*']}
+                source={{ html: mapTemplate }}
+                className="h-[100vw]"
+              />
+            </View>
+          )}
+
           {detail.typ === 1 && (
             <View className="bg-[#111] mx-4 py-3 rounded-3xl">
               {detail.exercises.length > 0 && (
@@ -333,6 +355,9 @@ const Profile = () => {
           <Text className="text-[24px] font-pbold text-white">{user.name}</Text>
         </View>
         <Text className="text-lg font-psemibold text-[#838383]">@{user.username}</Text>
+        {user.bio.length > 0 && (
+          <Text className="text-lg font-pregular text-[#838383]">{user.bio}</Text>
+        )}
         <Text className="text-lg font-pregular text-[#838383]">{getFriendsText(friends.length)}</Text>
       </View>
 
@@ -358,9 +383,10 @@ const Profile = () => {
             <FormField
               title={'содержание'}
               value={caption}
+              max={2000}
               handleChangeText={(e) => setCaption(e)}
               multiline={true}
-              numberOfStrokes={10}
+              numberOfStrokes={4}
               otherStyles={'mx-4 mt-2 mb-1'}
             />
 
@@ -453,16 +479,6 @@ const Profile = () => {
               </View>
               <Text className="text-[#838383] font-pregular text-[19px]">{formatTime(calculateTotalTime())}</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="flex flex-row justify-between items-center pb-1 border-b-[#222] border-b-2">
-              <View className="flex flex-row items-center">
-                <Image
-                  source={icons.meal}
-                  className="w-5 h-5 mt-1 mr-2"
-                />
-                <Text className="text-[#ffffff] font-pbold text-[21px]">съедено</Text>
-              </View>
-              <Text className="text-[#838383] font-pregular text-[19px]">2800ккал</Text>
-            </TouchableOpacity>
             <Text className="text-[#838383] font-pregular mt-2 text-[19px]">график изменения массы</Text>
           </TouchableOpacity>
 
@@ -537,9 +553,9 @@ const Profile = () => {
               </View>
             </View>
 
-            {weekly.weight[weekly.weight.length - 1]?.val !== form.weight && (
+            {weekly.weight[weekly.weight.length - 1]?.val !== tosave && tosave.length > 0 && (
               <TouchableOpacity className="bg-white py-2 rounded-xl mx-4 mb-2"
-                onPress={() => {
+                onPress={async () => {
                   const updatedWeightList = [...form.weightList,
                   {
                     val: parseFloat(tosave),
@@ -547,11 +563,15 @@ const Profile = () => {
                   ];
                   setForm({ ...form, weight: tosave, weightList: updatedWeightList });
 
-                  updateWeekly(
+                  setRefreshing(true);
+                  const done = await updateWeekly(
                     user.$id,
-                    form.weightList
+                    updatedWeightList
                   );
-                  onRefresh();
+
+                  if (done) {
+                    onRefresh();
+                  }
                 }}
               >
                 <Text className="text-[#000] font-pregular text-[19px] text-center">сохранить</Text>

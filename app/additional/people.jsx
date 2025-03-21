@@ -56,7 +56,7 @@ const Create = () => {
                 <TouchableOpacity onPress={() => { router.push('/additional/co') }} className="w-[48%]">
                     <View>
                         <Image
-                            source={{ uri: 'https://athleteblr.netlify.app/more/help/image.jpg' }}
+                            source={{ uri: 'https://www.meme-arsenal.com/memes/6d0056527e4cb964a756a1c09eda3862.jpg' }}
                             className="w-full h-[100px] rounded-3xl"
                         />
                         <View className="w-full h-[100px] absolute bg-[#00000070]"></View>

@@ -311,7 +311,28 @@ And if you're hungry for more than just a course and want to understand how we l
 
 
 
+    <script>
+        const texts = [
+            "спортивное приложение",
+            "релиз 1 марта",
+            "скажи физкультпривет"
+        ];
 
+        let index = 0;
+
+        setInterval(() => {
+            const txt = document.getElementById('text');
+            txt.style.opacity = 0;
+            txt.style.filter = "blur(5px)";
+
+            setTimeout(() => {
+                index = (index + 1) % texts.length;
+                txt.innerHTML = texts[index];
+                txt.style.opacity = 1;
+                txt.style.filter = "blur(0)";
+            }, 250);
+        }, 2000);
+    </script>
 
 
 

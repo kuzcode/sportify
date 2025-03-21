@@ -40,7 +40,7 @@ export const types = [
     { title: 'турники', key: '2', a: 'тренировку', color: '#ACE1AF' },
     { title: 'футбол', key: '3', track: [5] },
     { title: 'хоккей', key: '4', track: [1] },
-    { title: 'плавание', key: '5', a: 'заплыв', color: '#8DC6FF', track: [0, 1] },
+    { title: 'плавание', key: '5', a: 'заплыв', color: '#8DC6FF', track: [0] },
     { title: 'баскетбол', key: '6' },
     { title: 'бокс', key: '7', a: 'тренировку', color: '#660000' },
     { title: 'борьба', key: '8' },
@@ -64,7 +64,7 @@ export const colors = [
     ['#ACE1AF', '#50C878'],
     ['#89CFF0', '#007FFF'],
     ['#6F00FF', '#8A2BE2'],
-    ['#4B2E39', '#32021F'],
+    ['#ff8f00', '#ff6f00'],
     ['#A52A2A', '#3D0C02']
 ]
 

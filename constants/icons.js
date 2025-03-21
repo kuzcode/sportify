@@ -38,8 +38,10 @@ import bike from "../assets/icons/bike.png";
 import swim from "../assets/icons/swim.png";
 import bell from "../assets/icons/bell.png";
 import coin from "../assets/icons/coin.png";
+import handshake from "../assets/icons/handshake.png";
 
 export default {
+  handshake,
   coin,
   bell,
   contest,

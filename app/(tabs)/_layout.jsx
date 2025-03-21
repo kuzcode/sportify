@@ -59,7 +59,6 @@ const TabLayout = () => {
             ),
           }}
         />
-
         <Tabs.Screen
           name="map"
           options={{

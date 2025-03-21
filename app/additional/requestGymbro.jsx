@@ -56,7 +56,8 @@ const Create = () => {
                 handleChangeText={(e) => setForm({ ...form, description: e })}
                 otherStyles="mt-4"
                 multiline={true}
-                max={2000}
+                numberOfStrokes={4}
+                max={1000}
             />
 
             <FormField
@@ -65,6 +66,7 @@ const Create = () => {
                 handleChangeText={(e) => setForm({ ...form, contact: e })}
                 otherStyles="mt-4"
                 multiline={true}
+                numberOfStrokes={2}
                 max={100}
             />
 
@@ -75,6 +77,8 @@ const Create = () => {
             }} className="bg-[#fff] mt-4 mb-10 rounded-2xl py-3">
                 <Text className="font-pregular text-[20px] text-center">сохранить</Text>
             </TouchableOpacity>
+
+            <View className="mt-[7vh]"></View>
         </ScrollView>
     )
 }

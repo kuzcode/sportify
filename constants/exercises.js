@@ -71,88 +71,142 @@ export const exercises = [
     {
         title: 'жим штанги лёжа с наклоном', //11
         tab: 3,
-        img: "",
+        img: "https://i07.fotocdn.net/s207/cfb458d042a5b44a/public_pin_l/2497967067.jpg",
         description: ""
     },
     {
         title: 'сведение рук в кроссовере', //12
         tab: 3,
-        img: "",
+        img: "https://i.pinimg.com/736x/b1/43/ea/b143ea5e3d0d6d595307c7451d98657a.jpg",
         description: ""
     },
     {
         title: 'тяга т-штанги обеими руками в наклоне', //13
         tab: 3,
-        img: "",
+        img: "https://roliki-magazin.ru/wp-content/uploads/7/9/9/7991c3110d2580ecfdfb76fe83853351.jpeg",
         description: ""
     },
     {
         title: 'отжимания от пола', //14
         tab: 3,
         weightNeed: false,
-        img: "",
+        img: "https://dich.media/wp-content/uploads/2021/11/Snimok-ekrana-2021-11-23-v-23.10.34.jpg",
         description: ""
     },
     {
         title: 'подтягивания', //15
         tab: 4,
         weightNeed: false,
-        img: "",
+        img: "https://sportishka.com/uploads/posts/2023-12/1701464544_sportishka-com-p-bokovoi-khvat-na-turnike-oboi-69.jpg",
         description: ""
     },
     {
         title: 'тяга на нижнем блоке', //16
         tab: 4,
-        img: "",
+        img: "https://krasnoyarsk.fitnessdoctor.ru/wa-data/public/shop/products/22/13/1322/images/61967/61967.970.JPG",
         description: ""
     },
     {
-        title: 'тяга гантели в наклоне', //16
+        title: 'тяга гантели в наклоне', //17
         tab: 4,
-        img: "",
+        img: "https://www.shapejunkie.com/wp-content/uploads/2018/08/Dumbbell-Row-for-men.jpg",
         description: ""
     },
     {
-        title: 'становая тяга', //16
+        title: 'тяга верхнего блока', //18
         tab: 4,
-        img: "",
+        img: "https://i.pinimg.com/736x/16/41/0f/16410f3a51db5ab678818685a904b111.jpg",
         description: ""
     },
     {
-        title: 'приседания со штангой', //16
-        tab: 5,
-        img: "",
+        title: 'становая тяга', //19
+        tab: 4,
+        img: "https://fb.ru/misc/i/gallery/14550/2368217.jpg",
         description: ""
     },
     {
-        title: 'жим ногами', //16
+        title: 'приседания со штангой', //20
         tab: 5,
-        img: "",
+        img: "https://i1.sndcdn.com/artworks-R1cdhqotgMWRErbB-nWLA0w-t500x500.jpg",
         description: ""
     },
     {
-        title: 'выпрямление ног на квадрицепс', //16
+        title: 'жим ногами', //21
         tab: 5,
-        img: "",
+        img: "https://ice-profy.ru/wp-content/uploads/2023/06/6-1024x1024.jpeg",
         description: ""
     },
     {
-        title: 'сгибание ног на бицепс', //16
+        title: 'выпрямление ног на квадрицепс', //22
         tab: 5,
-        img: "",
+        img: "https://i.pinimg.com/originals/a5/55/37/a5553743b905397cea53a1608602a9a0.jpg",
         description: ""
     },
     {
-        title: 'выпады со штангой', //16
+        title: 'сгибание ног на бицепс', //23
         tab: 5,
-        img: "",
+        img: "https://image.made-in-china.com/2f0j00tyEaNWqchfoO/Commercial-Fitness-Equipment-Sp-013A-Horizontal-Leg-Curl.jpg",
+        description: ""
+    },
+    {
+        title: 'выпады со штангой', //24
+        tab: 5,
+        img: "https://i.pinimg.com/736x/ec/dc/0e/ecdc0ead96270f0f6799dd9d177cb777.jpg",
+        description: ""
+    },
+    {
+        title: 'голень стоя', //25
+        tab: 5,
+        img: "https://petraholding.ru/d/trenazher_dlya_prisedaniy_powertec_tm_squat_calf_l-sc13_6.jpg",
+        description: ""
+    },
+    {
+        title: 'жим штанги с груди стоя', //26
+        tab: 3,
+        img: "https://i.pinimg.com/originals/b9/09/fb/b909fb2901b50fb674f1871b57944a15.jpg",
+        description: ""
+    },
+    {
+        title: 'разводка гантелей в стороны', //27
+        tab: 6,
+        img: "https://dumpster.cdn.sports.ru/a/84/c6848a151d89da18cd42dbb9720b9.jpg",
+        description: ""
+    },
+    {
+        title: 'предплечье со штангой подхватом', //28
+        tab: 7,
+        img: "https://i.vimeocdn.com/video/714143676-1ec1d130cd15f7ed00b17ed8590ae912913557e7f43a7897c0155d829ce16c58-d?f=webp",
         description: ""
     },
 ]
+
+export const swimmingExs = [
+    {
+        title: 'кроль', //0
+        img: 'https://static13.tgcnt.ru/posts/_0/2c/2c13c668bb8d50c4bff23f195a90e7b1.jpg',
+        description: 'или вольный стиль',
+    },
+    {
+        title: 'баттерфляй', //0
+        img: 'https://static13.tgcnt.ru/posts/_0/2c/2c13c668bb8d50c4bff23f195a90e7b1.jpg',
+        description: 'или дельфин',
+    },
+    {
+        title: 'на спине', //0
+        img: 'https://static13.tgcnt.ru/posts/_0/2c/2c13c668bb8d50c4bff23f195a90e7b1.jpg',
+        description: '',
+    },
+    {
+        title: 'брасс', //0
+        img: 'https://static13.tgcnt.ru/posts/_0/2c/2c13c668bb8d50c4bff23f195a90e7b1.jpg',
+        description: '',
+    },
+]
+
 export const datas = [
     {
         name: 'программа арнольда шварцнеггера',
-        desc: '6 дня в неделю, в спортзале',
+        desc: '6 дней в неделю, в спортзале',
         description: 'по этой программе тренировался арнольд шварцнеггер',
         type: 'сплит',
         img: 'https://news.store.rambler.ru/img/c27c53f91466827916308f1767351c8b?img-format=auto&img-1-resize=height:565,fit:max&img-2-filter=sharpen',
@@ -167,62 +221,260 @@ export const datas = [
                 bReps: 8,
             },
             {
-                ind: 10,
+                ind: 11,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 15,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 19,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 20,
+                aReps: 5,
+                bReps: 10,
+            },
+            {
+                ind: 23,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 25,
+                aReps: 5,
+                bReps: 15,
+            },
+            ]
+        },
+        {
+            day: 2, //wednsday
+            icon: 'muscles',
+            title: 'дельты, бицепс, трицепс',
+            ex: [{
+                ind: 26,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 27,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 9,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 9,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 1,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 0,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 5,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 28,
+                aReps: 5,
+                bReps: 8,
+            },
+
+            ]
+        },
+        {
+            day: 3, //monday
+            icon: 'muscles',
+            title: 'день груди, спины и ног',
+            ex: [{
+                ind: 9,
                 aReps: 5,
                 bReps: 8,
             },
             {
                 ind: 11,
-                aReps: 6,
+                aReps: 5,
                 bReps: 8,
-            },
-            {
-                ind: 12,
-                aReps: 5,
-                bReps: 10,
-            },
-            {
-                ind: 8,
-                aReps: 5,
-                bReps: 'максимум',
             },
             {
                 ind: 15,
                 aReps: 5,
-                bReps: 'максимум',
+                bReps: 8,
             },
             {
-                ind: 13,
+                ind: 19,
                 aReps: 5,
                 bReps: 8,
             },
             {
-                ind: 12,
+                ind: 20,
                 aReps: 5,
                 bReps: 10,
             },
             {
-                ind: 12,
+                ind: 23,
                 aReps: 5,
-                bReps: 10,
+                bReps: 8,
             },
             {
-                ind: 12,
+                ind: 25,
                 aReps: 5,
-                bReps: 10,
+                bReps: 15,
             },
             ]
         },
         {
-            day: 3, //wednsday
+            day: 4, //wednsday
             icon: 'muscles',
-            title: 'день рук, среда',
+            title: 'дельты, бицепс, трицепс',
             ex: [{
-                ind: 0,
-                aReps: 3,
+                ind: 26,
+                aReps: 5,
                 bReps: 8,
-            }]
-        }
+            },
+            {
+                ind: 27,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 9,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 9,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 1,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 0,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 5,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 28,
+                aReps: 5,
+                bReps: 8,
+            },
+
+            ]
+        },
+        {
+            day: 5, //monday
+            icon: 'muscles',
+            title: 'день груди, спины и ног',
+            ex: [{
+                ind: 9,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 11,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 15,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 19,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 20,
+                aReps: 5,
+                bReps: 10,
+            },
+            {
+                ind: 23,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 25,
+                aReps: 5,
+                bReps: 15,
+            },
+            ]
+        },
+        {
+            day: 6, //wednsday
+            icon: 'muscles',
+            title: 'дельты, бицепс, трицепс',
+            ex: [{
+                ind: 26,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 27,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 9,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 9,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 1,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 0,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 5,
+                aReps: 5,
+                bReps: 8,
+            },
+            {
+                ind: 28,
+                aReps: 5,
+                bReps: 8,
+            },
+
+            ]
+        },
         ]
     }
 ]

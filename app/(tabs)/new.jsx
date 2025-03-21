@@ -104,7 +104,7 @@ const Create = () => {
         onPress={() => { router.push('/additional/card') }}
         className="bg-[#3c87ff] mx-auto w-[91.545vw] h-[53vw] py-3 rounded-[10px] overflow-hidden">
         <Text className="text-white font-pregular mx-4 text-[#ffffff83] text-[24px] mt-1 leading-[24px]">клубная{`\n`}карта участника</Text>
-        <Text className="text-white font-pbold text-[27vw] text-center absolute bottom-[-40px] left-[-20px] right-[-20px] text-nowrap">athlete</Text>
+        <Text className="text-white font-pbold tracking-[8px] text-[35vw] text-center absolute bottom-[-55px] left-[-100px] right-[-100px] text-nowrap">атлет</Text>
         <View className="mx-4 mt-2 absolute w-[83.545vw] bottom-4">
           {//<View style={styles.outerBlock}>
             //<View style={[styles.innerBlock, { width: blockWidth }]} />
@@ -118,7 +118,7 @@ const Create = () => {
         <TouchableOpacity onPress={() => { router.push('/additional/communities') }} className="bg-[#111] mt-4 rounded-3xl flex flex-row px-[16px] py-[16px] items-center">
           <Image
             className="w-10 h-10 mr-[16px]"
-            source={icons.neww}
+            source={icons.handshake}
             tintColor={'#fff'}
           />
           <View>
@@ -136,7 +136,6 @@ const Create = () => {
         </View>
       )}
 
-
       <TouchableOpacity
         onPress={() => { router.push('/additional/programms') }}
         className="bg-[#111] mt-4 rounded-3xl flex flex-row px-[16px] py-[16px] items-center">
@@ -148,20 +147,6 @@ const Create = () => {
         <View>
           <Text className="text-white text-[22px] font-psemibold">программы тренировок</Text>
           <Text className="text-[#828282] text-[18px] font-pregular">найди или создай свою</Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => { router.push('/additional/music') }}
-        className="bg-[#111] mt-4 rounded-3xl flex flex-row px-[16px] py-[16px] items-center">
-        <Image
-          className="w-10 h-10 mr-[16px]"
-          source={icons.music}
-          tintColor={'#fff'}
-        />
-        <View>
-          <Text className="text-white text-[22px] font-psemibold">музыка</Text>
-          <Text className="text-[#828282] text-[18px] font-pregular pr-4">наши плейлисты для твоих тренировок</Text>
         </View>
       </TouchableOpacity>
 

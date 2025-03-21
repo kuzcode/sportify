@@ -12,6 +12,12 @@ const AdditionalLayout = () => {
     <>
       <Stack>
         <Stack.Screen
+          name="live"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="settings"
           options={{
             headerShown: false,
@@ -37,6 +43,12 @@ const AdditionalLayout = () => {
         />
         <Stack.Screen
           name="notifications"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="additional"
           options={{
             headerShown: false,
           }}

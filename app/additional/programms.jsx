@@ -14,6 +14,7 @@ const Programms = () => {
     const [alShown, setAlShown] = useState(false);
     const [currentpr, setCurrentpr] = useState({});
     const [calendar, setCalendar] = useState({});
+    const [often, setOften] = useState(0);
 
     useEffect(() => {
         const fetchCalendar = async () => {
@@ -93,6 +94,19 @@ const Programms = () => {
                             className="w-8 h-8"
                             tintColor={'#fff'}
                         />
+                    </TouchableOpacity>
+                </View>
+
+                <Text className='text-[#fff] font-pbold text-[19px] text-left mx-4 mt-4 leading-[21px] mb-2'>частота</Text>
+                <View className="mx-4 flex flex-row justify-between">
+                    <TouchableOpacity onPress={() => { setOften(0) }} className={`${often === 0 ? 'bg-white' : 'bg-[#111]'} w-[32%] rounded-2xl py-2`}>
+                        <Text className={`${often === 0 ? 'text-black' : 'text-[#fff]'} font-pregular text-[17px] text-center mx-4 leading-[21px]`}>все</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => { setOften(1) }} className={`${often === 1 ? 'bg-white' : 'bg-[#111]'} w-[32%] rounded-2xl py-2`}>
+                        <Text className={`${often === 1 ? 'text-black' : 'text-[#fff]'} font-pregular text-[17px] text-center mx-4 leading-[21px]`}>редко</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => { setOften(2) }} className={`${often === 2 ? 'bg-white' : 'bg-[#111]'} w-[32%] rounded-2xl py-2`}>
+                        <Text className={`${often === 2 ? 'text-black' : 'text-[#fff]'} font-pregular text-[17px] text-center mx-4 leading-[21px]`}>часто</Text>
                     </TouchableOpacity>
                 </View>
             </View>

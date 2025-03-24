@@ -54,6 +54,7 @@ const Bookmark = () => {
   const [lastPaused, setLastPaused] = useState(0);
   const [totalPaused, setTotalPaused] = useState(0);
   const [val, setVal] = useState(0);
+  const [effort, setEffort] = useState(0);
 
   const route = useRoute();
   const { width } = Dimensions.get("window");
@@ -80,7 +81,8 @@ const Bookmark = () => {
     3: 'скорость',
     4: 'сред. скорость',
     5: 'счёт',
-    6: 'подъём'
+    6: 'подъём',
+    7: 'калории',
   };
 
   const handlePress = (item) => {
@@ -304,7 +306,7 @@ const Bookmark = () => {
   }
 
   const handleConfirmFinish = () => {
-    saveCompleted(user.$id, parseInt(current.key), timeElapsed, parseFloat(distance).toFixed(2), findMatchingIndices(), description, transformCoordinates(coordinates))
+    saveCompleted(user.$id, parseInt(current.key), timeElapsed, parseFloat(distance).toFixed(2), findMatchingIndices(), description, transformCoordinates(coordinates), effort)
     setCoins(user.$id, user.balance + (timeElapsed / 60))
     setExp(user, user.exp + (timeElapsed / 30))
     setIsTracking(false);
@@ -472,6 +474,128 @@ const Bookmark = () => {
         </View>
       )}
 
+      {exsShown && (
+        <View className="z-20 bg-black w-full h-[100vh] absolute px-4">
+          <ScrollView className="pt-10 left-0 mb-[100px]">
+            <TouchableOpacity onPress={() => { setExsShown(false) }}>
+              <Image
+                className="w-8 h-8"
+                tintColor="#fff"
+                source={icons.close}
+              />
+            </TouchableOpacity>
+
+            <ScrollView horizontal={true}
+              className="pb-1 mt-4"
+            >
+              <TouchableOpacity
+                className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 0 ? "bg-white" : "bg-[#111]"}`}
+                onPress={() => setCurrentTab(0)}
+              >
+                <Text className={`text-[19px] font-pregular ${currentTab === 0 ? "text-black" : "text-[#838383]"}`}>
+                  все
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 1 ? "bg-white" : "bg-[#111]"}`}
+                onPress={() => setCurrentTab(1)}
+              >
+                <Text className={`text-[19px] font-pregular ${currentTab === 1 ? "text-black" : "text-[#838383]"}`}>
+                  избранные
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 2 ? "bg-white" : "bg-[#111]"}`}
+                onPress={() => setCurrentTab(2)}
+              >
+                <Text className={`text-[19px] font-pregular ${currentTab === 2 ? "text-black" : "text-[#838383]"}`}>
+                  руки
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 3 ? "bg-white" : "bg-[#111]"}`}
+                onPress={() => setCurrentTab(3)}
+              >
+                <Text className={`text-[19px] font-pregular ${currentTab === 3 ? "text-black" : "text-[#838383]"}`}>
+                  грудь
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 4 ? "bg-white" : "bg-[#111]"}`}
+                onPress={() => setCurrentTab(4)}
+              >
+                <Text className={`text-[19px] font-pregular ${currentTab === 4 ? "text-black" : "text-[#838383]"}`}>
+                  спина
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 5 ? "bg-white" : "bg-[#111]"}`}
+                onPress={() => setCurrentTab(5)}
+              >
+                <Text className={`text-[19px] font-pregular ${currentTab === 5 ? "text-black" : "text-[#838383]"}`}>
+                  ноги
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 6 ? "bg-white" : "bg-[#111]"}`}
+                onPress={() => setCurrentTab(6)}
+              >
+                <Text className={`text-[19px] font-pregular ${currentTab === 6 ? "text-black" : "text-[#838383]"}`}>
+                  плечи
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 7 ? "bg-white" : "bg-[#111]"}`}
+                onPress={() => setCurrentTab(7)}
+              >
+                <Text className={`text-[19px] font-pregular ${currentTab === 7 ? "text-black" : "text-[#838383]"}`}>
+                  предплечья
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            {exercises
+              .filter(ex => currentTab === 0 || (currentTab === 1 ? ex.isLiked === true : ex.tab === currentTab))
+              .map((ex, index) => (
+                <TouchableOpacity
+                  key={index}
+                  className={`${doing.some(item => item.title === ex.title) ? "bg-[#fff]" : "bg-[#111]"} my-1 rounded-xl flex-row items-center justify-left`}
+                  onPress={() => handleDoing(ex)}
+                >
+                  {ex.img && (
+                    <Image
+                      source={{ uri: ex.img }}
+                      className="w-[85px] h-[85px] rounded-l-xl bg-[#fff]"
+                    />
+                  )}
+                  <View className="flex flex-col">
+                    <View className="flex flex-row ml-4 mt-2 mr-[90px] items-center flex-wrap">
+                      <Text className={`${doing.some(item => item.title === ex.title) ? "text-[#000]" : "text-[#fff]"} text-wrap font-pbold text-[18px] mr-2`}>{ex.title}</Text>
+                      <TouchableOpacity onPress={() => handleFavorite(ex)}>
+                        <Image
+                          className="w-[21px] h-[21px] mr-2"
+                          tintColor={fav.includes(ex) ? "#ff0000" : "#838383"}
+                          source={icons.heart}
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    {ex.description && (
+                      <Text className={`${doing.some(item => item.title === ex.title) ? "text-[#666]" : "text-[#838383]"}  font-pregular text-[16px] ml-4 mr-[102px] leading-[17px] mb-2`}>{ex.description}</Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+
+            <View className="mt-[14vh]"></View>
+          </ScrollView>
+
+          <TouchableOpacity className="bg-[#fff] py-3 rounded-2xl z-10 absolute left-4 right-4 bottom-[85px]" onPress={() => { setExsShown(false) }}>
+            <Text className='font-pregular text-black text-[18px] text-center'>готово</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {counterShown && (
         <View className="bg-[#000] w-[100vw] h-[100vh] absolute top-0 z-30">
           <Text className="text-[80px] mt-[40vh] text-center font-psemibold text-white">{count}</Text>
@@ -500,6 +624,7 @@ const Bookmark = () => {
                         }]}>{item.title}</Text>
                     </TouchableOpacity>
                   ))}
+                  <View className="ml-[40vw]"></View>
                 </ScrollView>
               </View>
             )}
@@ -535,38 +660,90 @@ const Bookmark = () => {
               </View>
             )}
 
-            {isTracking ? (
-              <TouchableOpacity className="absolute right-6 top-[11px] z-10 bg-[#ffffff24] rounded-lg p-1"
-                onPress={() => { setOptionsShown(true) }}
-              >
-                <Image
-                  source={icons.dots}
-                  tintColor={'#fff'}
-                  className="w-8 h-8"
-                />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity className="absolute right-6 top-[52px] z-10 bg-[#ffffff24] rounded-lg p-1"
-                onPress={() => { setOptionsShown(true) }}
-              >
-                <Image
-                  source={icons.dots}
-                  tintColor={'#fff'}
-                  className="w-8 h-8"
-                />
-              </TouchableOpacity>
-            )}
+            {
+              programmShown && (
+                <View className="z-20 bg-black w-full h-[100vh] absolute top-0 px-4">
+                  <TouchableOpacity onPress={() => { setProgrammShown(false) }}>
+                    <Image
+                      className="w-8 h-8"
+                      tintColor="#fff"
+                      source={icons.close}
+                    />
+                  </TouchableOpacity>
+
+                  {oneProgram.map(pr =>
+                    <TouchableOpacity key={pr} onPress={() => {
+                      setCurPr(pr)
+                      setCurPrShown(true)
+                      setProgrammShown(false)
+                    }} className="bg-[#111] px-4 py-4 rounded-3xl mt-4">
+                      <Text className="text-white text-[19px] font-pbold">{pr.name}</Text>
+                      <Text className="text-[#838383] text-[18px] font-pregular">{pr.desc}</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )
+            }
+
+            {
+              curPrShown && (
+                <View className="z-20 bg-black w-full h-[100vh] absolute top-0 px-4">
+                  <TouchableOpacity onPress={() => { setCurPrShown(false) }}>
+                    <Image
+                      className="w-8 h-8"
+                      tintColor="#fff"
+                      source={icons.close}
+                    />
+                  </TouchableOpacity>
+
+                  <Text className="text-white text-[20px] font-pbold text-center">{curPr.name}</Text>
+
+                  <ScrollView>
+                    {curPr.exercises.map((item, index) =>
+                      <View key={index} className="bg-[#111] px-4 rounded-3xl mt-4 py-3 flex flex-row flex-wrap justify-between items-center">
+                        <Text className="text-white text-[20px] font-pregular">{item.title}, {item.reps.length}×{item.reps[0].reps}</Text>
+
+                        <TouchableOpacity onPress={() => {
+                          setCurPr(prev => ({
+                            ...prev,
+                            exercises: prev.exercises.filter((_, i) => i !== index)
+                          }));
+                        }}>
+                          <Image
+                            source={icons.minus}
+                            className="w-6 h-6 opacity-50"
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    <View className="mt-[200px]"></View>
+                  </ScrollView>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      setDoing(curPr.exercises);
+                      setCurPrShown(false);
+                    }}
+                    className="bg-white pb-3 pt-1 rounded-2xl absolute bottom-[120px] w-full right-4 left-4">
+                    <Text className="text-black font-pregular text-[20px] mt-1 text-center">применить</Text>
+                  </TouchableOpacity>
+                </View>
+              )
+            }
             <View className="bg-primary rounded-xl mb-4 mx-4 py-1">
               <Text className="text-[#fff] font-pbold text-[37px] text-center">{formatTime(timeElapsed)}</Text>
             </View>
 
-            <View className="px-4 flex flex-row flex-wrap w-[100vw] justify-between">
-              {trackedData.map((data, index) => (
-                <View key={index} className="w-[43.75vw] bg-[#111] m-1 py-1 px-2 rounded-xl">
-                  <Text className="text-[#838383] font-pregular text-[17px]">{data.label}</Text>
-                  <Text className="text-white text-[30px] font-psemibold">{data.value}<Text className="text-[17px] font-pregular text-[#838383]">{data?.meas}</Text></Text>
-                </View>
-              ))}
+            <ScrollView className="px-4 w-[100vw]">
+              <View className="flex flex-row justify-between flex-wrap">
+                {trackedData.map((data, index) => (
+                  <View key={index} className="w-[43.75vw] bg-[#111] m-1 py-1 px-2 rounded-xl">
+                    <Text className="text-[#838383] font-pregular text-[17px]">{data.label}</Text>
+                    <Text className="text-white text-[30px] font-psemibold">{data.value}<Text className="text-[17px] font-pregular text-[#838383]">{data?.meas}</Text></Text>
+                  </View>
+                ))}
+              </View>
 
 
               {['0', '10', '13'].includes(current.key) && !isTracking && (
@@ -574,7 +751,7 @@ const Bookmark = () => {
                   <Text className="text-white font-pregular mx-4 text-[17px]">точность</Text>
                   <View className="flex-1 items-center justify-center my-4">
                     <Slider
-                      style={{ width: width - 32, height: 100 }}
+                      style={{ width: width - 32, height: 20 }}
                       value={val}
                       className=""
                       onValueChange={(value) => setVal(value)}
@@ -602,196 +779,7 @@ const Bookmark = () => {
 
               {current.key === '1' && (
                 <View className="w-full">
-                  {
-                    programmShown && (
-                      <View className="z-20 bg-black w-full h-[100vh] absolute top-[-150px] pt-10">
-                        <TouchableOpacity onPress={() => { setProgrammShown(false) }}>
-                          <Image
-                            className="w-8 h-8"
-                            tintColor="#fff"
-                            source={icons.close}
-                          />
-                        </TouchableOpacity>
-
-                        {oneProgram.map(pr =>
-                          <TouchableOpacity key={pr} onPress={() => {
-                            setCurPr(pr)
-                            setCurPrShown(true)
-                            setProgrammShown(false)
-                          }} className="bg-[#111] px-4 py-4 rounded-3xl mt-4">
-                            <Text className="text-white text-[19px] font-pbold">{pr.name}</Text>
-                            <Text className="text-[#838383] text-[18px] font-pregular">{pr.desc}</Text>
-                          </TouchableOpacity>
-                        )}
-                      </View>
-                    )
-                  }
-
-                  {
-                    curPrShown && (
-                      <View className="z-20 bg-black w-full h-[100vh] absolute top-[-150px] pt-10">
-                        <TouchableOpacity onPress={() => { setCurPrShown(false) }}>
-                          <Image
-                            className="w-8 h-8"
-                            tintColor="#fff"
-                            source={icons.close}
-                          />
-                        </TouchableOpacity>
-
-                        <Text className="text-white text-[20px] font-pbold text-center">{curPr.name}</Text>
-
-                        {curPr.exercises.map((item, index) =>
-                          <View key={index} className="bg-[#111] px-4 rounded-3xl mt-4 py-3 flex flex-row flex-wrap justify-between items-center">
-                            <Text className="text-white text-[20px] font-pregular">{item.title}, {item.reps.length}×{item.reps[0].reps}</Text>
-
-                            <TouchableOpacity onPress={() => {
-                              setCurPr(prev => ({
-                                ...prev,
-                                exercises: prev.exercises.filter((_, i) => i !== index)
-                              }));
-                            }}>
-                              <Image
-                                source={icons.minus}
-                                className="w-6 h-6 opacity-50"
-                              />
-                            </TouchableOpacity>
-                          </View>
-                        )}
-
-                        <TouchableOpacity
-                          onPress={() => {
-                            setDoing(curPr.exercises);
-                            setCurPrShown(false);
-                          }}
-                          className="bg-white pb-3 pt-1 rounded-2xl absolute bottom-[78px] w-full right-3 left-1">
-                          <Text className="text-black font-pregular text-[20px] mt-1 text-center">применить</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )
-                  }
-
-                  {exsShown && (
-                    <View className="z-20 bg-black w-full h-[100vh] absolute top-[-150px]">
-                      <ScrollView className="pt-10 left-0 mb-[100px]">
-                        <TouchableOpacity onPress={() => { setExsShown(false) }}>
-                          <Image
-                            className="w-8 h-8"
-                            tintColor="#fff"
-                            source={icons.close}
-                          />
-                        </TouchableOpacity>
-
-                        <ScrollView horizontal={true}
-                          className="pb-1 mt-4"
-                        >
-                          <TouchableOpacity
-                            className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 0 ? "bg-white" : "bg-[#111]"}`}
-                            onPress={() => setCurrentTab(0)}
-                          >
-                            <Text className={`text-[19px] font-pregular ${currentTab === 0 ? "text-black" : "text-[#838383]"}`}>
-                              все
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 1 ? "bg-white" : "bg-[#111]"}`}
-                            onPress={() => setCurrentTab(1)}
-                          >
-                            <Text className={`text-[19px] font-pregular ${currentTab === 1 ? "text-black" : "text-[#838383]"}`}>
-                              избранные
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 2 ? "bg-white" : "bg-[#111]"}`}
-                            onPress={() => setCurrentTab(2)}
-                          >
-                            <Text className={`text-[19px] font-pregular ${currentTab === 2 ? "text-black" : "text-[#838383]"}`}>
-                              руки
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 3 ? "bg-white" : "bg-[#111]"}`}
-                            onPress={() => setCurrentTab(3)}
-                          >
-                            <Text className={`text-[19px] font-pregular ${currentTab === 3 ? "text-black" : "text-[#838383]"}`}>
-                              грудь
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 4 ? "bg-white" : "bg-[#111]"}`}
-                            onPress={() => setCurrentTab(4)}
-                          >
-                            <Text className={`text-[19px] font-pregular ${currentTab === 4 ? "text-black" : "text-[#838383]"}`}>
-                              спина
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 5 ? "bg-white" : "bg-[#111]"}`}
-                            onPress={() => setCurrentTab(5)}
-                          >
-                            <Text className={`text-[19px] font-pregular ${currentTab === 5 ? "text-black" : "text-[#838383]"}`}>
-                              ноги
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 6 ? "bg-white" : "bg-[#111]"}`}
-                            onPress={() => setCurrentTab(6)}
-                          >
-                            <Text className={`text-[19px] font-pregular ${currentTab === 6 ? "text-black" : "text-[#838383]"}`}>
-                              плечи
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            className={`py-1 px-4 mr-2 rounded-xl ${currentTab === 7 ? "bg-white" : "bg-[#111]"}`}
-                            onPress={() => setCurrentTab(7)}
-                          >
-                            <Text className={`text-[19px] font-pregular ${currentTab === 7 ? "text-black" : "text-[#838383]"}`}>
-                              предплечья
-                            </Text>
-                          </TouchableOpacity>
-                        </ScrollView>
-
-                        {exercises
-                          .filter(ex => currentTab === 0 || (currentTab === 1 ? ex.isLiked === true : ex.tab === currentTab))
-                          .map((ex, index) => (
-                            <TouchableOpacity
-                              key={index}
-                              className={`${doing.some(item => item.title === ex.title) ? "bg-[#fff]" : "bg-[#111]"} my-1 rounded-xl flex-row items-center justify-left`}
-                              onPress={() => handleDoing(ex)}
-                            >
-                              {ex.img && (
-                                <Image
-                                  source={{ uri: ex.img }}
-                                  className="w-[85px] h-[85px] rounded-l-xl bg-[#fff]"
-                                />
-                              )}
-                              <View className="flex flex-col">
-                                <View className="flex flex-row ml-4 mt-2 mr-[90px] items-center flex-wrap">
-                                  <Text className={`${doing.some(item => item.title === ex.title) ? "text-[#000]" : "text-[#fff]"} text-wrap font-pbold text-[18px] mr-2`}>{ex.title}</Text>
-                                  <TouchableOpacity onPress={() => handleFavorite(ex)}>
-                                    <Image
-                                      className="w-[21px] h-[21px] mr-2"
-                                      tintColor={fav.includes(ex) ? "#ff0000" : "#838383"}
-                                      source={icons.heart}
-                                    />
-                                  </TouchableOpacity>
-                                </View>
-
-                                {ex.description && (
-                                  <Text className={`${doing.some(item => item.title === ex.title) ? "text-[#666]" : "text-[#838383]"}  font-pregular text-[16px] ml-4 mr-[102px] leading-[17px] mb-2`}>{ex.description}</Text>
-                                )}
-                              </View>
-                            </TouchableOpacity>
-                          ))}
-
-                        <View className="mt-[14vh]"></View>
-                      </ScrollView>
-
-                      <TouchableOpacity className="bg-[#fff] py-3 rounded-2xl z-10 absolute bottom-[85px] w-full" onPress={() => { setExsShown(false) }}>
-                        <Text className='font-pregular text-black text-[18px] text-center'>готово</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                  <ScrollView className="h-[90vh] mb-2">
+                  <ScrollView className="mb-2">
                     {doing?.map(exe =>
                       <View key={exe} className="bg-[#111] py-3 rounded-2xl mb-2 pb-[40px]">
                         <View className="flex flex-row justify-between mb-1">
@@ -871,29 +859,8 @@ const Bookmark = () => {
                       </View>
                     )}
 
-                    <View className="mt-[50vh]"></View>
+                    <View className="mt-[1vh]"></View>
                   </ScrollView>
-
-
-                  {doing.length === 0 ? (
-                    <View className="absolute top-[47vh] left-0 right-0">
-                      <TouchableOpacity className="bg-[#111] py-3 rounded-2xl" onPress={() => { setProgrammShown(true) }}>
-                        <Text className='font-pregular text-white text-[18px] text-center'>выбери готовую тренировку</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity className="bg-[#111] py-3 rounded-2xl mt-2" onPress={() => { setExsShown(true) }}>
-                        <Text className='font-pregular text-white text-[18px] text-center'>добавь упражение</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ) : (
-                    <View className="flex flex-row justify-between mt-8 absolute top-[51vh]">
-                      <TouchableOpacity className="bg-[#090909] py-3 rounded-2xl w-[49%]" onPress={() => { setProgrammShown(true) }}>
-                        <Text className='font-pregular text-white text-[18px] text-center'>готовая</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity className="bg-[#090909] py-3 rounded-2xl w-[49%]" onPress={() => { setExsShown(true) }}>
-                        <Text className='font-pregular text-white text-[18px] text-center'>добавь</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
                 </View>
               )}
 
@@ -1069,27 +1036,6 @@ const Bookmark = () => {
                       </View>
                     )}
                   </ScrollView>
-
-
-                  {doing.length === 0 ? (
-                    <View className="absolute top-[92%] left-0 right-0">
-                      <TouchableOpacity className="bg-[#111] py-3 rounded-2xl" onPress={() => { setProgrammShown(true) }}>
-                        <Text className='font-pregular text-white text-[18px] text-center'>выбери готовую тренировку</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity className="bg-[#111] py-3 rounded-2xl mt-2" onPress={() => { setExsShown(true) }}>
-                        <Text className='font-pregular text-white text-[18px] text-center'>добавь упражение</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ) : (
-                    <View className="flex flex-row justify-between mt-8">
-                      <TouchableOpacity className="bg-[#111] py-3 rounded-2xl w-[49%]" onPress={() => { setProgrammShown(true) }}>
-                        <Text className='font-pregular text-white text-[18px] text-center'>готовая</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity className="bg-[#111] py-3 rounded-2xl w-[49%]" onPress={() => { setExsShown(true) }}>
-                        <Text className='font-pregular text-white text-[18px] text-center'>добавь</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
                 </View>
               )}
 
@@ -1102,7 +1048,8 @@ const Bookmark = () => {
                 </View>
               )}
 
-            </View>
+              <View className="mt-[40vh]"></View>
+            </ScrollView>
           </View>
 
           {current?.track?.includes(5) && (
@@ -1117,36 +1064,61 @@ const Bookmark = () => {
             </View>
           )}
 
-          {!isTracking ? (
-            <TouchableOpacity onPress={handleStart} className="bg-primary p-4 rounded-xl absolute bottom-[120px] w-[91vw] mx-4">
-              <Text className="text-white text-center text-[20px] font-psemibold">начать</Text>
-            </TouchableOpacity>
-          ) : (
-            <View>
-              {paused ? (
-                <View className="absolute w-full bottom-[120px] flex flex-row px-4 justify-between">
-                  <TouchableOpacity onPress={handlePause} className="bg-[#131313] p-4 rounded-xl w-[49%]">
-                    <Text className="text-white text-center text-lg font-psemibold">продолжить</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => {
-                    handlePause();
-                    handleFinish();
-                  }} className="bg-primary p-4 rounded-xl w-[49%]">
-                    <Text className="text-white text-center text-lg font-psemibold">закончить</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View className="absolute w-full bottom-[120px] flex flex-row px-4 justify-between">
-                  <TouchableOpacity onPress={handlePause} className="bg-[#131313] p-4 rounded-xl w-[49%]">
-                    <Text className="text-white text-center text-lg font-psemibold">пауза</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={handleFinish} className="bg-primary p-4 rounded-xl w-[49%]">
-                    <Text className="text-white text-center text-lg font-psemibold">закончить</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          )}
+          <View className="absolute bottom-[120px] left-4 right-4">
+            {current.key === '1' && doing.length === 0 ? (
+              <View className="mb-2">
+                <TouchableOpacity className="bg-[#111] py-3 rounded-2xl" onPress={() => { setProgrammShown(true) }}>
+                  <Text className='font-pregular text-white text-[18px] text-center'>выбери готовую тренировку</Text>
+                </TouchableOpacity>
+                <TouchableOpacity className="bg-[#111] py-3 rounded-2xl mt-2" onPress={() => { setExsShown(true) }}>
+                  <Text className='font-pregular text-white text-[18px] text-center'>добавь упражение</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View>
+                {current.key === '1' && (
+                  <View className="flex flex-row justify-between mb-2">
+                    <TouchableOpacity className="bg-[#111] py-3 rounded-2xl w-[49%]" onPress={() => { setProgrammShown(true) }}>
+                      <Text className='font-pregular text-white text-[18px] text-center'>готовая</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity className="bg-[#111] py-3 rounded-2xl w-[49%]" onPress={() => { setExsShown(true) }}>
+                      <Text className='font-pregular text-white text-[18px] text-center'>добавь</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
+            {!isTracking ? (
+              <TouchableOpacity onPress={handleStart} className="bg-primary py-4 rounded-2xl">
+                <Text className="text-white text-center text-[20px] font-psemibold">начать</Text>
+              </TouchableOpacity>
+            ) : (
+              <View>
+                {paused ? (
+                  <View className="w-full flex flex-row justify-between">
+                    <TouchableOpacity onPress={handlePause} className="bg-[#131313] p-4 rounded-2xl w-[49%]">
+                      <Text className="text-white text-center text-lg font-psemibold">продолжить</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                      handlePause();
+                      handleFinish();
+                    }} className="bg-primary p-4 rounded-2xl w-[49%]">
+                      <Text className="text-white text-center text-lg font-psemibold">закончить</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <View className="w-full flex flex-row justify-between">
+                    <TouchableOpacity onPress={handlePause} className="bg-[#131313] p-4 rounded-2xl w-[49%]">
+                      <Text className="text-white text-center text-lg font-psemibold">пауза</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleFinish} className="bg-primary p-4 rounded-2xl w-[49%]">
+                      <Text className="text-white text-center text-lg font-psemibold">закончить</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
 
           {isSaving && (
             <View className="bg-[#000] absolute top-0 w-[100vw] h-[100vh] z-30 p-0 left-0 m-0">
@@ -1168,7 +1140,7 @@ const Bookmark = () => {
                   (
                     <View className="flex flex-row mt-4 mx-4 justify-between">
                       <View className="bg-primary rounded-3xl pt-2 w-[49%]">
-                        <Text className="text-[22px] text-white font-pbold mx-4">+{(timeElapsed / 60).toFixed()} <Text className="text-[18px]">монет</Text></Text>
+                        <Text className="text-[19px] text-white font-pbold mx-4">+{(timeElapsed / 60).toFixed()} <Text className="text-[18px]">монет</Text></Text>
                         <View className="flex flex-row bg-[#2870dd] justify-between px-4 py-2 mt-2 rounded-b-3xl">
                           {user.balance > 0 ? (
                             <Text className="text-[18px] text-white font-pbold">{user.balance}</Text>
@@ -1183,7 +1155,7 @@ const Bookmark = () => {
                       <View
                         style={{ backgroundColor: rank[(user.rank - 1)].color }}
                         className={`rounded-3xl pt-2 w-[49%]`}>
-                        <Text className="text-[22px] text-white font-pbold mx-4">+{(timeElapsed / 30).toFixed()} <Text className="text-[18px]">к уровню</Text></Text>
+                        <Text className="text-[19px] text-white font-pbold mx-4">+{(timeElapsed / 30).toFixed()} <Text className="text-[18px]">к уровню</Text></Text>
                         <View className="flex flex-row bg-[#00000030] justify-between px-4 py-2 mt-2 rounded-b-3xl">
                           {user.exp > 0 ? (
                             <Text className="text-[18px] text-white font-pbold">{user.exp}</Text>
@@ -1198,6 +1170,23 @@ const Bookmark = () => {
                   )
                 }
 
+                <View className="bg-[#111] py-2 rounded-3xl mt-4 mx-4">
+                  <Text className="text-white font-pregular mx-4 text-[17px]">было тяжело?</Text>
+                  <View className="flex-1 items-center justify-center">
+                    <Slider
+                      style={{ width: width - 40, height: 40 }}
+                      value={val}
+                      className=""
+                      onValueChange={(value) => setEffort(value)}
+                      minimumValue={0}
+                      maximumValue={10}
+                      step={1}
+                      minimumTrackTintColor="#FFFFFF"
+                      maximumTrackTintColor="#555"
+                    />
+                  </View>
+                  <View className="flex flex-row justify-between mx-4"><Text className="text-[#838383] font-pregular text-[17px]">легко</Text><Text className="text-[#838383] font-pregular text-[17px]">сложно</Text></View>
+                </View>
                 <FormField
                   title={'описание'}
                   max={1000}
@@ -1207,6 +1196,7 @@ const Bookmark = () => {
                   numberOfStrokes={4}
                   otherStyles={'mx-4 mt-4'}
                 />
+                <View className="mt-[40vh]"></View>
               </ScrollView>
               <View className="absolute bottom-[120px] w-full">
                 <TouchableOpacity onPress={() => {

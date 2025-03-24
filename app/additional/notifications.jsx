@@ -66,6 +66,7 @@ const Create = () => {
         async function fetchNotifs() {
             try {
                 const got = await getUserNotifications(user.$id);
+                setNotifications(got);
 
                 // Получаем уведомления с именами
                 const notificationsWithNames = await Promise.all(got.map(async (notification) => {
@@ -77,10 +78,10 @@ const Create = () => {
                     };
                 }));
 
-                // Сначала устанавливаем уведомления
+                console.log('with names: ', notificationsWithNames)
+
                 setNotifications(notificationsWithNames);
 
-                // Проверяем, есть ли уведомление с type === 5
                 const notificationWithType5 = notificationsWithNames.find(notification => notification.type === 5);
                 if (notificationWithType5) {
                     const contentId = notificationWithType5.contentId; // Получаем contentId
@@ -99,7 +100,7 @@ const Create = () => {
                 }
 
                 const notificationWithType7 = notificationsWithNames.find(notification => notification.type === 7);
-                if (notificationWithType5) {
+                if (notificationWithType7) {
                     const contentId = notificationWithType7.contentId; // Получаем contentId
                     const completedData = await getRoute(contentId); // Получаем данные через getCompleted
 
@@ -124,6 +125,9 @@ const Create = () => {
 
         fetchNotifs();
     }, []);
+
+    console.log(notifications)
+
     useEffect(() => {
         async function fetchWeb() {
             try {
@@ -135,7 +139,6 @@ const Create = () => {
                         var routesToDraw = [];  // Создаем массив для маршрутов, которые будут отрисованы
                         r.documents[0].coord.map(c => {
                             routesToDraw.push([c.x, c.y])
-                            console.log(routesToDraw)
                         });
                         webRef.current.injectJavaScript(`drawRoutes(${JSON.stringify([routesToDraw])});`);
                     }

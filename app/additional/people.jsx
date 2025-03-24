@@ -21,20 +21,27 @@ import { useNavigation } from '@react-navigation/native';
 
 const Create = () => {
     const [users, setUsers] = useState([])
+    const [total, setTotal] = useState(1)
     const navigation = useNavigation();
+    const { user } = useGlobalContext();
 
     useEffect(() => {
         async function fetchUsers() {
             try {
-                const got = await getAllUsers();
-                setUsers(got)
+                const got = await getAllUsers(0);
+                const filteredUsers = got
+                    .filter(shit => shit.$id !== user.$id) // Замените на реальный id пользователя, которого нужно исключить
+                    .sort((a, b) => new Date(b.$createdAt) - new Date(a.$createdAt)); // Сортировка по $createdAt
+                setUsers(filteredUsers);
             } catch (error) {
                 console.error('Error fetching users: ', error);
             }
         }
 
         fetchUsers();
-    }, [])
+    }, []);
+
+
 
     return (
         <ScrollView className="bg-[#000] pt-10 px-4">
@@ -71,10 +78,17 @@ const Create = () => {
                     <TouchableOpacity
                         onPress={() => navigation.navigate('otherProfile', us)} // переходим на экран Bookmark
                         className="bg-[#111] rounded-3xl flex flex-row mt-4">
-                        <Image
-                            source={{ uri: us.imageUrl }}
-                            className="w-[90px] h-[90px] rounded-l-3xl"
-                        />
+                        {us.imageUrl ? (
+                            <Image
+                                source={{ uri: us.imageUrl }}
+                                className="w-[90px] h-[90px] rounded-l-3xl"
+                            />
+                        ) : (
+                            <Image
+                                source={icons.avatar}
+                                className="w-[90px] h-[90px] rounded-l-3xl"
+                            />
+                        )}
                         <View>
                             <View className="flex flex-row flex-wrap pr-[100px] mt-2">
                                 <Text className="text-[20px] ml-4 font-pbold text-white">{us.name}</Text>
@@ -83,6 +97,19 @@ const Create = () => {
                         </View>
                     </TouchableOpacity>
                 ))}
+
+            <TouchableOpacity
+                onPress={async () => {
+                    setTotal(total + 1);
+                    const more = await getAllUsers(total);
+                    const filteredUsers = more
+                        .filter(shit => shit.$id !== user.$id) // Замените на реальный id пользователя, которого нужно исключить
+                        .sort((a, b) => new Date(b.$createdAt) - new Date(a.$createdAt)); // Сортировка по $createdAt
+                    setUsers([...users, ...filteredUsers]);
+                }}
+                className="bg-[#111] rounded-2xl py-3 mt-4">
+                <Text className="text-white text-center font-pregular text-[18px]">показать ещё</Text>
+            </TouchableOpacity>
 
             <View className="mt-[120px]">
             </View>

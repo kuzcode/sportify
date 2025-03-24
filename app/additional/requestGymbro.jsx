@@ -30,7 +30,7 @@ const Create = () => {
     })
 
     return (
-        <ScrollView className="bg-[#000] pt-10 px-4">
+        <ScrollView className="bg-[#111] pt-10 px-4">
             <Text className="text-white font-pbold text-[21px]">заявка на gymbro</Text>
             <Text className="text-[#838383] font-pregular text-[20px] mb-4">gymbro — друг или подруга, который(-ая) подстрахует на жиме</Text>
 

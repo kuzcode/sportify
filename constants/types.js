@@ -93,7 +93,7 @@ export const rank = [
     {
         exp: 2000,
         color: '#0bffbd',
-        name: 'мр. олимпия'
+        name: 'богатырь'
     },
     {
         exp: 10000,

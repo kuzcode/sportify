@@ -2,7 +2,7 @@ import { View, Text, Image, TouchableOpacity, ScrollView, RefreshControl, TextIn
 import { useRouter } from "expo-router";
 import { useState, useEffect, useRef } from "react";
 import useAppwrite from "../../lib/useAppwrite";
-import { getUserCompleted, getWeeklyReport, getUserById, sendNotif, getAwards, getUserAwards, getUserFriends, getAwardsByIds, createPost, getUserPosts } from "../../lib/appwrite";
+import { getUserCompleted, getWeeklyReport, getUserById, sendNotif, getAwards, getUserAwards, getUserFriends, getAwardsByIds, deleteFriend, getUserPosts } from "../../lib/appwrite";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { rank, types } from "../../constants/types";
 import { icons } from "../../constants";
@@ -38,6 +38,7 @@ const OtherProfile = () => {
   const [tosave, setTosave] = useState(0);
   const [detail, setDetail] = useState({});
   const [detailShown, setDetailShown] = useState(false);
+  const [alShown, setAlShown] = useState(false);
   const ref = useRef(null);
 
   const [weekly, setWeekly] = useState({
@@ -137,7 +138,7 @@ const OtherProfile = () => {
     };
 
     fetchCompletedDocuments();
-  }, [profile.$id]);
+  }, [profile]);
 
   useEffect(() => {
     const combined = [...posts, ...completed];
@@ -188,6 +189,45 @@ const OtherProfile = () => {
     return completed.reduce((total, item) => {
       return total + item.time;
     }, 0);
+  };
+
+  const formatDate = (dateString) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInMs = now - date; // Разница во времени в миллисекундах
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60)); // Разница в минутах
+    const diffInHours = Math.floor(diffInMinutes / 60); // Разница в часах
+    const diffInDays = Math.floor(diffInMinutes / (60 * 24)); // Разница в днях
+    const diffInMonths = Math.floor(diffInDays / 30); // Разница в месяцах
+
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes}мин назад`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours}ч назад`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays}дн назад`;
+    } else {
+      const options = { month: 'long', day: 'numeric' };
+      const formattedDate = new Intl.DateTimeFormat('ru-RU', options).format(date);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${formattedDate}, ${hours}:${minutes}`;
+    }
+  };
+
+  const calculatePace = (time, distance) => {
+    if (distance === 0) return "--:--";
+
+    const paceInMinutes = time / 60 / distance;
+    const minutes = Math.floor(paceInMinutes);
+    const seconds = Math.round((paceInMinutes - minutes) * 60);
+
+    if (time / 60 / distance < 200) {
+      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+    else {
+      return "--:--";
+    }
   };
 
   const styles = StyleSheet.create({
@@ -267,23 +307,45 @@ const OtherProfile = () => {
 
   return (
     <ScrollView className="bg-[#000] h-full">
+      {alShown && (
+        <View className="bg-[#222] absolute z-20 top-[25vh] left-8 right-8 px-4 py-3 rounded-3xl">
+          <Text className="text-white text-[20px] font-pbold">ты уверен, что хочешь удалить друга?</Text>
+          <Text className="text-[#838383] text-[18px] font-pregular">ты сможешь отправить заявку ещё раз</Text>
+          <TouchableOpacity onPress={() => { setAlShown(false) }} className="bg-[#333] py-2 rounded-2xl mt-2">
+            <Text className="text-center text-[19px] font-pregular text-white">не удалять</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => {
+            deleteFriend(user.$id, profile.$id);
+            setAlShown(false);
+          }} className="bg-[#fff] py-2 rounded-2xl mt-3">
+            <Text className="text-center text-[19px] font-pregular">удалить</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View className="w-[100vw] flex justify-center items-center mt-[100px]">
-        <View className="w-[40vw] h-[40vw] rounded-full mb-4 flex justify-center items-center">
+        {profile.imageUrl ? (
           <Image
             source={{ uri: profile?.imageUrl }}
-            className="w-[100%] h-[100%] rounded-full bg-[#111] -rotate-90"
+            className="w-[40vw] h-[40vw] rounded-3xl bg-[#111] mb-2"
             resizeMode="cover"
           />
-        </View>
+        ) : (
+          <Image
+            source={icons.avatar}
+            className="w-[40vw] h-[40vw] rounded-3xl bg-[#111] mb-2"
+          />
+        )}
 
         <View className="flex flex-row">
           <Text className="text-[24px] font-pbold text-white">{profile.name}</Text>
         </View>
         <Text className="text-lg font-psemibold text-[#838383]">@{profile.username}</Text>
+        <Text className="text-lg font-pregular text-[#838383] text-center mx-10">{profile.bio}</Text>
       </View>
 
       {friends.includes(user.$id) ? (
-        <TouchableOpacity className="bg-[#111] mx-4 rounded-xl py-2 my-4" onPress={() => { router.push('/bookmark') }}>
+        <TouchableOpacity className="bg-[#111] mx-4 rounded-xl py-2 my-4" onPress={() => { setAlShown(true) }}>
           <Text className="text-[#838383] font-pregular text-center text-[19px]">удалить из друзей</Text>
         </TouchableOpacity>
       ) : (
@@ -297,7 +359,7 @@ const OtherProfile = () => {
               sendNotif(
                 {
                   sendTo: profile.$id,
-                  sentById: user.$id,
+                  userId: user.$id,
                 }
               )
               setSent(true);
@@ -325,27 +387,91 @@ const OtherProfile = () => {
 
       {tab === 0 && (
         <View>
-          {combinedList.map(item => (
-            item.caption ? (
-              <View className="bg-[#111] mx-4 py-3 rounded-3xl px-4 mt-4">
-                <Text className="text-[18px] font-pregular text-white">{item.caption}</Text>
-              </View>
-            ) : (
-              <TouchableOpacity key={item.id} onPress={() => {
-                setDetail(item);
-                setDetailShown(true);
-                ref.current.scrollTo({ y: 0, animated: true });
-              }} className="bg-[#111] py-3 rounded-3xl mx-4 mt-4">
-                <Text className="text-white font-pbold mx-4 text-[20px]">
-                  {types[item.typ].title}
-                  {item.distance > 0 && (`, ${item.distance}км`)}
-                </Text>
-                <Text className="text-[#838383] font-pregular mx-4 text-[18px]">
-                  {item.time ? formatTime(item.time) : formatTime(item.createdAt)}
-                </Text>
-              </TouchableOpacity>
-            )
-          ))}
+          {combinedList.length > 0 ? (
+            <View>
+              {combinedList.map(item => (
+                item.caption ? (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setPost(item);
+                      setPostShown(true);
+                      ref.current.scrollTo({ y: 0, animated: true });
+                    }}
+                    className="bg-[#111] mx-4 py-3 rounded-3xl px-4 mt-4">
+                    <View className="flex flex-row">
+                      <Image
+                        source={{ uri: profile.imageUrl }}
+                        className="w-[52px] h-[52px] rounded-xl mr-3"
+                      />
+                      <View className="flex flex-col">
+                        <Text className="text-white mr-4 text-[19px] font-pbold">{profile.name}</Text>
+                        <Text className="text-[#838383] mr-4 text-[17px] font-pregular">{formatDate(item.$createdAt)}</Text>
+                      </View>
+                    </View>
+
+
+                    <View className="h-[2px] bg-[#222] rounded-xl my-4"></View>
+                    <Text className="text-[18px] font-pregular text-white">{item.caption}</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity key={item.id} onPress={() => {
+                    setDetail(item);
+                    setDetailShown(true);
+                    ref.current.scrollTo({ y: 0, animated: true });
+                  }} className="bg-[#111] py-3 rounded-3xl mx-4 mt-4">
+                    <View className="flex flex-row mx-4">
+                      <Image
+                        source={{ uri: profile.imageUrl }}
+                        className="w-[52px] h-[52px] rounded-xl mr-3"
+                      />
+                      <View className="flex flex-col">
+                        <Text className="text-white mr-4 text-[19px] font-pbold">{profile.name}</Text>
+                        <Text className="text-[#838383] mr-4 text-[17px] font-pregular">{types[item.typ]?.title}, {formatDate(item.$createdAt)}</Text>
+                      </View>
+                    </View>
+
+                    {item.description?.length > 0 && (
+                      <Text className="text-[#838383] mx-4 text-[17px] mt-4 font-pregular">{item.description}</Text>
+                    )}
+
+                    <View className="mx-4 h-[2px] bg-[#222] rounded-xl my-4"></View>
+
+                    <View className="flex flex-row justify-between mx-4">
+                      <View className="">
+                        <Text className="font-pregular text-[#838383] text-[17px]">время</Text>
+                        <Text className="font-pregular text-[#fff] text-[17px]">{formatTime(item.time)}</Text>
+                      </View>
+
+                      {item.distance > 0 && (
+                        <View>
+                          <Text className="font-pregular text-[#838383] text-[17px]">темп</Text>
+                          <Text className="font-pregular text-[#fff] text-[17px]">{calculatePace(item.time, item.distance)}/км</Text>
+                        </View>
+                      )}
+
+                      {item.distance > 0 && (
+                        <View>
+                          <Text className="font-pregular text-[#838383] text-[17px]">дистанция</Text>
+                          <Text className="font-pregular text-[#fff] text-[17px]">{item.distance}км</Text>
+                        </View>
+                      )}
+
+                      {item.exercises.length > 0 && (
+                        <View>
+                          <Text className="font-pregular text-[#838383] text-[17px]">упражнений</Text>
+                          <Text className="font-pregular text-[#fff] text-[17px]">{item.exercises.length}</Text>
+                        </View>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                )
+              ))}
+            </View>
+          ) : (
+            <View>
+              <Text className="font-pbold text-white text-[20px] text-center mx-4 mt-4">в ленте пока ничего нет</Text>
+            </View>
+          )}
         </View>
       )}
 
@@ -396,16 +522,6 @@ const OtherProfile = () => {
                 <Text className="text-[#ffffff] font-pbold text-[21px]">тренировки</Text>
               </View>
               <Text className="text-[#838383] font-pregular text-[19px]">{formatTime(calculateTotalTime())}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="flex flex-row justify-between items-center pb-1 border-b-[#222] border-b-2">
-              <View className="flex flex-row items-center">
-                <Image
-                  source={icons.meal}
-                  className="w-5 h-5 mt-1 mr-2"
-                />
-                <Text className="text-[#ffffff] font-pbold text-[21px]">съедено</Text>
-              </View>
-              <Text className="text-[#838383] font-pregular text-[19px]">2800ккал</Text>
             </TouchableOpacity>
             <Text className="text-[#838383] font-pregular mt-2 text-[19px]">график изменения массы</Text>
           </TouchableOpacity>
@@ -511,6 +627,8 @@ const OtherProfile = () => {
             )}
           </View>
         </View>)}
+
+      <View className="mt-[10vh]"></View>
     </ScrollView>
   );
 };

@@ -51,6 +51,19 @@ const Comms = () => {
         });
     };
 
+    const getParticipantWord = (count) => {
+        const lastDigit = count % 10;
+        const lastTwoDigits = count % 100;
+
+        if (lastDigit === 1 && lastTwoDigits !== 11) {
+            return "участник";
+        } else if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 12 || lastTwoDigits > 14)) {
+            return "участника";
+        } else {
+            return "участников";
+        }
+    };
+
 
     useEffect(() => {
         const fetchRecs = async () => {
@@ -220,37 +233,41 @@ const Comms = () => {
                                 />
                             )}
                         </View>
-                        <Text className="text-[#838383] font-pregular text-[17px] ml-4 mt-[-3] mr-1">{com.users.length} участник</Text>
+                        <Text className="text-[#838383] font-pregular text-[17px] ml-4 mt-[-3] mr-1">{com.users.length} {getParticipantWord(com.users.length)}</Text>
                     </View>
                 </TouchableOpacity>
             )}
 
-            <Text className="text-[21px] font-pbold relative mx-4 text-[#fff] mt-[32px]">создано</Text>
-            {created.map(com =>
-                <TouchableOpacity onPress={() => {
-                    setCurrent(com);
-                    setRecsShown(true);
-                }} className="bg-[#111] rounded-3xl flex flex-row mx-4 mt-4">
-                    {com.imageUrl && (
-                        <Image
-                            source={{ uri: com.imageUrl }}
-                            className="w-[100] h-[100] rounded-l-3xl"
-                        />
-                    )}
-
-                    <View className="flex flex-col">
-                        <View className="flex flex-row">
-                            <Text className="text-white font-pbold text-[21px] ml-4 mr-1">{com.name}</Text>
-                            {com.isVerif && (
+            {created.length > 0 && (
+                <View>
+                    {created.map(com =>
+                        <TouchableOpacity onPress={() => {
+                            setCurrent(com);
+                            setRecsShown(true);
+                        }} className="bg-[#111] rounded-3xl flex flex-row mx-4 mt-4">
+                            {com.imageUrl && (
                                 <Image
-                                    source={icons.verify}
-                                    className="w-6 h-6 mt-[5]"
+                                    source={{ uri: com.imageUrl }}
+                                    className="w-[100] h-[100] rounded-l-3xl"
                                 />
                             )}
-                        </View>
-                        <Text className="text-[#838383] font-pregular text-[17px] ml-4 mt-[-3] mr-1">{com.users.length} участник</Text>
-                    </View>
-                </TouchableOpacity>
+
+                            <View className="flex flex-col">
+                                <View className="flex flex-row">
+                                    <Text className="text-white font-pbold text-[21px] ml-4 mr-1">{com.name}</Text>
+                                    {com.isVerif && (
+                                        <Image
+                                            source={icons.verify}
+                                            className="w-6 h-6 mt-[5]"
+                                        />
+                                    )}
+                                </View>
+                                <Text className="text-[#838383] font-pregular text-[17px] ml-4 mt-[-3] mr-1">{com.users.length} {getParticipantWord(com.users.length)}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                    <Text className="text-[21px] font-pbold relative mx-4 text-[#fff] mt-[32px]">создано</Text>
+                </View>
             )}
 
             <Text className="text-[21px] font-pbold relative mx-4 text-[#fff] mt-[32px]">рекомендуем</Text>
@@ -276,7 +293,7 @@ const Comms = () => {
                                 />
                             )}
                         </View>
-                        <Text className="text-[#838383] font-pregular text-[17px] ml-4 mt-[-3] mr-1">{item.users.length} участник</Text>
+                        <Text className="text-[#838383] font-pregular text-[17px] ml-4 mt-[-3] mr-1">{item.users.length} {getParticipantWord(item.users.length)}</Text>
                     </View>
 
                 </TouchableOpacity>

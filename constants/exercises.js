@@ -45,7 +45,7 @@ export const exercises = [
     {
         title: 'алмазные отжимания', //7
         tab: 2,
-        img: 'https://i.pinimg.com/736x/a2/c6/00/a2c600c2f600a6cbd350046b51449773.jpg',
+        img: 'https://fiziocentr.ru/wp-content/uploads/2021/11/almaznie-otzhimania-001.jpg',
         description: 'кисти рук максимально близко друг к другу',
         weightNeed: false
     },
@@ -174,6 +174,42 @@ export const exercises = [
     },
     {
         title: 'предплечье со штангой подхватом', //28
+        tab: 7,
+        img: "https://i.vimeocdn.com/video/714143676-1ec1d130cd15f7ed00b17ed8590ae912913557e7f43a7897c0155d829ce16c58-d?f=webp",
+        description: ""
+    },
+    {
+        title: 'бабочка', //29
+        tab: 3,
+        img: "https://roliki-magazin.ru/wp-content/uploads/6/8/2/68267a83ab6564bb8f759df26bf4f475.jpeg",
+        description: ""
+    },
+    {
+        title: 'сведение ног', //30
+        tab: 5,
+        img: "https://incredibody.com/wp-content/uploads/2016/01/body-solid-g-series-inner-outer-thigh-attachment-giot.png",
+        description: ""
+    },
+    {
+        title: 'разведение ног', //31
+        tab: 5,
+        img: "https://i.pinimg.com/originals/c8/46/c2/c846c20926d433b9f642419cc40b20c6.jpg",
+        description: ""
+    },
+    {
+        title: 'тяга горизонтального блока', //32
+        tab: 4,
+        img: "https://ak.picdn.net/shutterstock/videos/33735886/thumb/1.jpg",
+        description: ""
+    },
+    {
+        title: 'предплечье со штангой подхватом', //33
+        tab: 7,
+        img: "https://i.vimeocdn.com/video/714143676-1ec1d130cd15f7ed00b17ed8590ae912913557e7f43a7897c0155d829ce16c58-d?f=webp",
+        description: ""
+    },
+    {
+        title: 'предплечье со штангой подхватом', //34
         tab: 7,
         img: "https://i.vimeocdn.com/video/714143676-1ec1d130cd15f7ed00b17ed8590ae912913557e7f43a7897c0155d829ce16c58-d?f=webp",
         description: ""
@@ -481,13 +517,147 @@ export const datas = [
 
 export const oneProgram = [
     {
-        name: 'бицепсы с атлетом',
-        desc: 'на руки, 1 час',
+        name: 'фуллбоди за 2 часа',
+        desc: 'для атлетов среднего уровня',
         exercises: [
             {
-                title: 'гантель на бицепс',
-                tab: 2,
+                title: 'приседания со штангой',
+                tab: 5,
                 reps: [
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    }
+                ]
+            },
+            {
+                title: 'разгибание ног на бицепс',
+                tab: 5,
+                reps: [
+                    {
+                        reps: 15,
+                        weight: 20,
+                    },
+                    {
+                        reps: 15,
+                        weight: 20,
+                    },
+                    {
+                        reps: 15,
+                        weight: 20,
+                    }
+                ]
+            },
+            {
+                title: 'становая тяга',
+                tab: 5,
+                reps: [
+                    {
+                        reps: 5,
+                        weight: 20,
+                    },
+                    {
+                        reps: 5,
+                        weight: 20,
+                    },
+                    {
+                        reps: 5,
+                        weight: 20,
+                    }
+                ]
+            },
+            {
+                title: 'жим штанги лёжа',
+                tab: 5,
+                reps: [
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    }
+                ]
+            },
+            {
+                title: 'жим гантелей лёжа в наклоне',
+                tab: 5,
+                reps: [
+                    {
+                        reps: 15,
+                        weight: 20,
+                    },
+                    {
+                        reps: 15,
+                        weight: 20,
+                    },
+                    {
+                        reps: 15,
+                        weight: 20,
+                    }
+                ]
+            },
+            {
+                title: 'тяга штанги к подбородку стоя',
+                tab: 5,
+                reps: [
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    }
+                ]
+            },
+            {
+                title: 'подтягивания',
+                tab: 5,
+                reps: [
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    }
+                ]
+            },
+            {
+                title: 'верхний блок на трицепс',
+                tab: 5,
+                reps: [
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
                     {
                         reps: 10,
                         weight: 20,
@@ -496,10 +666,36 @@ export const oneProgram = [
             },
             {
                 title: 'штанга на бицепс',
-                tab: 2,
+                tab: 5,
                 reps: [
                     {
                         reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    },
+                    {
+                        reps: 10,
+                        weight: 20,
+                    }
+                ]
+            },
+            {
+                title: 'скручивания на полу на пресс',
+                tab: 5,
+                reps: [
+                    {
+                        reps: 15,
+                        weight: 20,
+                    },
+                    {
+                        reps: 15,
+                        weight: 20,
+                    },
+                    {
+                        reps: 15,
                         weight: 20,
                     }
                 ]

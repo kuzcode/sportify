@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, ScrollView, Text, Image, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { updateUser } from "../../lib/appwrite";
 import { useGlobalContext } from "../../context/GlobalProvider";
@@ -18,6 +18,7 @@ const ProfileSettings = () => {
     bio: user?.bio,
     username: user?.username,
     id: user?.$id,
+    changedFile: false,
   })
 
   const openPicker = async () => {
@@ -31,6 +32,7 @@ const ProfileSettings = () => {
         ...form,
         avatar: result.assets[0].uri,
         file: result.assets[0],
+        changedFile: true,
       });
 
       console.log('previous: ', form.previous)
@@ -66,11 +68,11 @@ const ProfileSettings = () => {
 
 
   return (
-    <View className="bg-[#111] w-full h-full px-4">
-      <TouchableOpacity onPress={() => openPicker()} className="w-[45vw] h-[45vw] mx-auto mt-[80px] rounded-full mb-4 flex justify-center items-center">
+    <ScrollView className="bg-[#111] w-full h-full px-4">
+      <TouchableOpacity onPress={() => openPicker()} className="w-[45vw] h-[45vw] mx-auto mt-[80px] rounded-3xl mb-4 flex justify-center items-center">
         <Image
           source={{ uri: form?.avatar }}
-          className="w-[100%] h-[100%] rounded-full bg-[#222]"
+          className="w-[100%] h-[100%] rounded-3xl bg-[#222]"
           resizeMode="cover"
         />
       </TouchableOpacity>
@@ -95,12 +97,15 @@ const ProfileSettings = () => {
         value={form.bio}
         handleChangeText={(e) => setForm({ ...form, bio: e })}
         otherStyles="mt-7"
+        multiline={true}
+        numberOfStrokes={4}
       />
 
-      <TouchableOpacity onPress={() => { checkSave() }} className="bg-white py-3 absolute bottom-10 w-full rounded-xl ml-4">
+      <TouchableOpacity onPress={() => { checkSave() }} className="bg-white py-3 w-full rounded-xl mt-4">
         <Text className="text-center font-pregular text-[18px]">сохранить</Text>
       </TouchableOpacity>
-    </View>
+      <View className="mt-[25vh]"></View>
+    </ScrollView>
   )
 }
 

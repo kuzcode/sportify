@@ -2,7 +2,7 @@ import { View, Text, Image, TouchableOpacity, ScrollView, RefreshControl, TextIn
 import { useRouter } from "expo-router";
 import { useState, useEffect, useRef } from "react";
 import useAppwrite from "../../lib/useAppwrite";
-import { getUserCompleted, getWeeklyReport, getUserById, updateWeekly, getAwards, getUserAwards, getUserFriends, getAwardsByIds, createPost, getUserPosts } from "../../lib/appwrite";
+import { getUserCompleted, getWeeklyReport, getUserById, updateWeekly, getAwards, getUserAwards, getUserFriends, getAwardsByIds, createPost, getUserPosts, deletePost } from "../../lib/appwrite";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { rank, types } from "../../constants/types";
 import { icons } from "../../constants";
@@ -27,6 +27,8 @@ const Profile = () => {
   const [tosave, setTosave] = useState(0);
   const [detail, setDetail] = useState({});
   const [detailShown, setDetailShown] = useState(false);
+  const [postShown, setPostShown] = useState(false);
+  const [post, setPost] = useState({});
   const ref = useRef(null);
 
   const [weekly, setWeekly] = useState({
@@ -35,7 +37,7 @@ const Profile = () => {
         val: 0,
       }
     ]
-  })
+  });
 
   const webRef = useRef(null);
 
@@ -43,28 +45,38 @@ const Profile = () => {
     async function fetchWeeklyReport() {
       try {
         const gotWeekly = await getWeeklyReport({
-          userId: user?.$id,
-          weight: 0
+          userId: user?.$id
         });
-        setTosave(gotWeekly.weight[gotWeekly.weight.length - 1].val);
-        setWeekly(gotWeekly);
-        console.log(gotWeekly);
+        console.log('gotweekly: ', gotWeekly);
+
+        // Проверяем наличие объектов в weight
+        if (gotWeekly?.weight?.length > 0) {
+          // Фильтруем массив weight, оставляя только объекты с val больше 20
+          const filteredWeights = gotWeekly.weight.filter(weightItem => weightItem.val > 20);
+
+          if (filteredWeights.length > 0) {
+            setWeekly({ weight: filteredWeights });
+            setTosave(filteredWeights[filteredWeights.length - 1].val);
+          } else {
+            setTosave(0);
+            setWeekly({
+              weight: [{ val: 0 }]
+            });
+          }
+        } else {
+          // Если в weight нет объектов, устанавливаем начальное значение
+          setTosave(0);
+          setWeekly({
+            weight: [{ val: 0 }]
+          });
+        }
       } catch (error) {
         console.error('Error fetching weekly report: ', error);
       }
     }
 
-    setForm({
-      weightList: weekly.weight,
-      weight: weekly.weight[weekly.weight.length - 1]?.val,
-      height: metrics.height,
-      changes: {
-        weight: (weekly.weight[weekly.weight.length - 1]?.val - weekly.weight[0]?.val).toFixed(1),
-        height: (weight[(weight.length - 1)] - weight[0]).toFixed(1),
-      }
-    })
     fetchWeeklyReport();
-  }, [user])
+  }, [user]);
 
   useEffect(() => {
     async function fetchAwards() {
@@ -209,23 +221,74 @@ const Profile = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInMs = now - date; // Разница во времени в миллисекундах
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60)); // Разница в минутах
+    const diffInHours = Math.floor(diffInMinutes / 60); // Разница в часах
+    const diffInDays = Math.floor(diffInMinutes / (60 * 24)); // Разница в днях
+    const diffInMonths = Math.floor(diffInDays / 30); // Разница в месяцах
+
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes}мин назад`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours}ч назад`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays}дн назад`;
+    } else {
+      const options = { month: 'long', day: 'numeric' };
+      const formattedDate = new Intl.DateTimeFormat('ru-RU', options).format(date);
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${formattedDate}, ${hours}:${minutes}`;
+    }
+  };
+
+
   const [weight, setWeight] = useState([70]); // Ваш список чисел
 
   const [form, setForm] = useState({
-    weightList: weekly.weight,
-    weight: weekly.weight[weekly.weight.length - 1]?.val,
-    height: metrics.height,
-    changes: {
-      weight: (weekly.weight[weekly.weight.length - 1]?.val - weekly.weight[0]?.val).toFixed(1),
-      height: (weight[(weight.length - 1)] - weight[0]).toFixed(1),
-    }
+    weightList: [{ val: 0 }],
+    weight: 0
   })
+
+  useEffect(() => {
+    setForm({
+      weightList: weekly.weight,
+      weight: weekly.weight[weekly.weight.length - 1]?.val,
+      height: metrics.height,
+      changes: {
+        weight: (weekly.weight[weekly.weight.length - 1]?.val - weekly.weight[0]?.val).toFixed(1),
+        height: (weight[(weight.length - 1)] - weight[0]).toFixed(1),
+      }
+    })
+  }, [weekly])
 
   useEffect(() => {
     if (completed[0]) {
       setTrainings(completed)
     }
   }, [completed]);
+
+  const [alShown, setAlShown] = useState(false);
+
+
+  const calculatePace = (time, distance) => {
+    if (distance === 0) return "--:--";
+
+    const paceInMinutes = time / 60 / distance;
+    const minutes = Math.floor(paceInMinutes);
+    const seconds = Math.round((paceInMinutes - minutes) * 60);
+
+    if (time / 60 / distance < 200) {
+      return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+    else {
+      return "--:--";
+    }
+  };
+
 
   useEffect(() => {
     const formattedRoutes = detail?.coordinates?.map(coord => [coord.x, coord.y]);
@@ -273,6 +336,60 @@ const Profile = () => {
       }
       ref={ref}
     >
+      {postShown && (
+        <View className="bg-black w-[100vw] h-full fixed top-0 z-10">
+          {alShown && (
+            <View className="bg-[#222] absolute z-20 top-[30vh] left-4 right-4 px-4 py-3 rounded-3xl">
+              <Text className="text-white text-[20px] font-pbold">ты уверен, что хочешь удалить запись?</Text>
+              <Text className="text-[#838383] text-[18px] font-pregular">её больше никто не увидит</Text>
+              <TouchableOpacity onPress={() => { setAlShown(false) }} className="bg-[#333] py-2 rounded-2xl mt-2">
+                <Text className="text-center text-[19px] font-pregular text-white">оставить</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => {
+                deletePost(post.$id);
+                setAlShown(false);
+                setPostShown(false);
+                onRefresh();
+              }} className="bg-[#fff] py-2 rounded-2xl mt-3">
+                <Text className="text-center text-[19px] font-pregular">удалить</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+
+          <TouchableOpacity className="absolute right-[16px] top-0 z-20" onPress={() => { setPostShown(false) }}>
+            <Image
+              source={icons.close}
+              className="w-8 h-8 top-8 right-0 mr-4 z-10"
+              tintColor={'white'}
+            />
+          </TouchableOpacity>
+
+          <View
+            className="bg-[#111] mx-4 py-3 rounded-3xl px-4 mt-[12vh]">
+            <View className="flex flex-row">
+              <Image
+                source={{ uri: user.imageUrl }}
+                className="w-[52px] h-[52px] rounded-xl mr-3"
+              />
+              <View className="flex flex-col">
+                <Text className="text-white mr-4 text-[19px] font-pbold">{user.name}</Text>
+                <Text className="text-[#838383] mr-4 text-[17px] font-pregular">{formatDate(post.$createdAt)}</Text>
+              </View>
+            </View>
+
+            <View className="h-[2px] bg-[#222] rounded-xl my-4"></View>
+            <Text className="text-[18px] font-pregular text-white">{post.caption}</Text>
+          </View>
+
+          <TouchableOpacity className="bg-[#240a0a] mt-4 mx-4 pt-2 pb-3 px-4 rounded-2xl"
+            onPress={() => { setAlShown(true) }}
+          >
+            <Text className="text-[#FF7E7E] font-pregular text-[18px] text-center">удалить запись</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {detailShown && (
         <View className="bg-black w-[100vw] h-full fixed top-0 z-10">
           <TouchableOpacity className="absolute right-[16px] top-0 z-20" onPress={() => { setDetailShown(false) }}>
@@ -312,11 +429,9 @@ const Profile = () => {
               {detail.exercises.length > 0 && (
                 <Text className="text-[#fff] font-pbold text-[20px] mx-4">упражнения:</Text>
               )}
-              {exercises.map(one =>
+              {detail.exercises.map((one, index) =>
                 <View>
-                  {detail.exercises.includes(exercises.indexOf(one)) && (
-                    <Text className="text-[#fff] font-pregular text-[20px] mx-4 mt-1"><Text className="text-[#838383]">{exercises.indexOf(one) + 1}.</Text> {exercises[exercises.indexOf(one)].title}</Text>
-                  )}
+                  <Text className="text-[#fff] font-pregular text-[20px] mx-4 mt-1"><Text className="text-[#838383]">{index + 1}.</Text> {exercises[one].title}</Text>
                 </View>
               )}
             </View>
@@ -343,13 +458,18 @@ const Profile = () => {
         </View>
 
 
-        <View className="w-[40vw] h-[40vw] rounded-full mb-4 flex justify-center items-center">
+        {user.imageUrl ? (
           <Image
             source={{ uri: user?.imageUrl }}
-            className="w-[100%] h-[100%] rounded-full bg-[#111] -rotate-90"
+            className="w-[40vw] h-[40vw] rounded-3xl bg-[#111] mb-2"
             resizeMode="cover"
           />
-        </View>
+        ) : (
+          <Image
+            source={icons.avatar}
+            className="w-[40vw] h-[40vw] rounded-3xl bg-[#111] mb-2"
+          />
+        )}
 
         <View className="flex flex-row">
           <Text className="text-[24px] font-pbold text-white">{user.name}</Text>
@@ -358,7 +478,6 @@ const Profile = () => {
         {user.bio.length > 0 && (
           <Text className="text-lg font-pregular text-[#838383]">{user.bio}</Text>
         )}
-        <Text className="text-lg font-pregular text-[#838383]">{getFriendsText(friends.length)}</Text>
       </View>
 
       <View className="flex flex-row mx-4 mb-4">
@@ -409,22 +528,78 @@ const Profile = () => {
 
           {combinedList.map(item => (
             item.caption ? (
-              <View className="bg-[#111] mx-4 py-3 rounded-3xl px-4 mt-4">
+              <TouchableOpacity
+                onPress={() => {
+                  setPost(item);
+                  setPostShown(true);
+                  ref.current.scrollTo({ y: 0, animated: true });
+                }}
+                className="bg-[#111] mx-4 py-3 rounded-3xl px-4 mt-4">
+                <View className="flex flex-row">
+                  <Image
+                    source={{ uri: user.imageUrl }}
+                    className="w-[52px] h-[52px] rounded-xl mr-3"
+                  />
+                  <View className="flex flex-col">
+                    <Text className="text-white mr-4 text-[19px] font-pbold">{user.name}</Text>
+                    <Text className="text-[#838383] mr-4 text-[17px] font-pregular">{formatDate(item.$createdAt)}</Text>
+                  </View>
+                </View>
+
+
+                <View className="h-[2px] bg-[#222] rounded-xl my-4"></View>
                 <Text className="text-[18px] font-pregular text-white">{item.caption}</Text>
-              </View>
+              </TouchableOpacity>
             ) : (
               <TouchableOpacity key={item.id} onPress={() => {
                 setDetail(item);
                 setDetailShown(true);
                 ref.current.scrollTo({ y: 0, animated: true });
               }} className="bg-[#111] py-3 rounded-3xl mx-4 mt-4">
-                <Text className="text-white font-pbold mx-4 text-[20px]">
-                  {types[item.typ].title}
-                  {item.distance > 0 && (`, ${item.distance}км`)}
-                </Text>
-                <Text className="text-[#838383] font-pregular mx-4 text-[18px]">
-                  {item.time ? formatTime(item.time) : formatTime(item.createdAt)}
-                </Text>
+                <View className="flex flex-row mx-4">
+                  <Image
+                    source={{ uri: user.imageUrl }}
+                    className="w-[52px] h-[52px] rounded-xl mr-3"
+                  />
+                  <View className="flex flex-col">
+                    <Text className="text-white mr-4 text-[19px] font-pbold">{user.name}</Text>
+                    <Text className="text-[#838383] mr-4 text-[17px] font-pregular">{types[item.typ]?.title}, {formatDate(item.$createdAt)}</Text>
+                  </View>
+                </View>
+
+                {item.description?.length > 0 && (
+                  <Text className="text-[#838383] mx-4 text-[17px] mt-4 font-pregular">{item.description}</Text>
+                )}
+
+                <View className="mx-4 h-[2px] bg-[#222] rounded-xl my-4"></View>
+
+                <View className="flex flex-row justify-between mx-4">
+                  <View className="">
+                    <Text className="font-pregular text-[#838383] text-[17px]">время</Text>
+                    <Text className="font-pregular text-[#fff] text-[17px]">{formatTime(item.time)}</Text>
+                  </View>
+
+                  {item.distance > 0 && (
+                    <View>
+                      <Text className="font-pregular text-[#838383] text-[17px]">темп</Text>
+                      <Text className="font-pregular text-[#fff] text-[17px]">{calculatePace(item.time, item.distance)}/км</Text>
+                    </View>
+                  )}
+
+                  {item.distance > 0 && (
+                    <View>
+                      <Text className="font-pregular text-[#838383] text-[17px]">дистанция</Text>
+                      <Text className="font-pregular text-[#fff] text-[17px]">{item.distance}км</Text>
+                    </View>
+                  )}
+
+                  {item.exercises.length > 0 && (
+                    <View>
+                      <Text className="font-pregular text-[#838383] text-[17px]">упражнений</Text>
+                      <Text className="font-pregular text-[#fff] text-[17px]">{item.exercises.length}</Text>
+                    </View>
+                  )}
+                </View>
               </TouchableOpacity>
             )
           ))}
@@ -482,6 +657,7 @@ const Profile = () => {
             <Text className="text-[#838383] font-pregular mt-2 text-[19px]">график изменения массы</Text>
           </TouchableOpacity>
 
+
           <View className="flex flex-row flex-1">
             <View className="w-full p-4">
               {weekly.weight.length !== 0 && (
@@ -516,7 +692,7 @@ const Profile = () => {
 
           <View className="bg-[#111] mx-4 py-2 rounded-3xl">
             <Text className="text-white font-pbold mx-4 text-[19px] mb-4">твои данные изменились?</Text>
-            <View className="flex flex-row w-[100%] justify-between px-4 mb-4">
+            <View className="w-[100%] px-4 mb-4">
               <View>
                 <TextInput
                   value={tosave.toString()}
@@ -529,27 +705,9 @@ const Profile = () => {
                     }
                   }}
                   keyboardType="numeric"
-                  className="bg-[#191919] w-[40vw] rounded-xl py-2 text-white font-pregular text-[17px] px-2"
+                  className="bg-[#191919] w-full rounded-xl py-2 text-white font-pregular text-[17px] px-2"
                 />
-
-
                 <Text className="text-[#bababa] font-pregular text-[14px] mt-1 ml-2">масса</Text>
-              </View>
-              <View>
-                <TextInput
-                  value={form.height?.toString()}
-                  onChangeText={(text) => {
-                    // Регулярное выражение для проверки, что ввод состоит только из цифр и одной точки
-                    const isValidInput = /^\d*\.?\d*$/.test(text);
-                    if (isValidInput) {
-                      setForm({ ...form, height: text });
-                    }
-                  }}
-                  keyboardType="numeric"
-                  className="bg-[#191919] w-[40vw] rounded-xl py-2 text-white font-pregular text-[17px] px-2"
-                />
-
-                <Text className="text-[#bababa] font-pregular text-[14px] mt-1 ml-2">рост</Text>
               </View>
             </View>
 
@@ -560,8 +718,10 @@ const Profile = () => {
                   {
                     val: parseFloat(tosave),
                   }
-                  ];
+                  ].filter(item => item.val !== undefined); // Удаляем объекты без ключа 'val'
                   setForm({ ...form, weight: tosave, weightList: updatedWeightList });
+                  console.log('updatedWeightList: ', updatedWeightList);
+
 
                   setRefreshing(true);
                   const done = await updateWeekly(

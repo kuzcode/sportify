@@ -62,7 +62,7 @@ const Create = () => {
                 </View>
             )}
             <Text className="text-white font-pbold text-[21px]">совместные тренировки</Text>
-            <Text className="text-[#838383] font-pregular text-[20px] mb-4">описание</Text>
+            <Text className="text-[#838383] font-pregular text-[20px] mb-4">тренируйтесь вместе</Text>
 
             <TouchableOpacity onPress={() => { router.push('/additional/requestCo') }} className="bg-[#111] rounded-3xl py-4">
                 <Text className="text-white font-pbold text-[21px] text-center">создай свою +</Text>

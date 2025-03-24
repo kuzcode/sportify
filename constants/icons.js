@@ -39,8 +39,10 @@ import swim from "../assets/icons/swim.png";
 import bell from "../assets/icons/bell.png";
 import coin from "../assets/icons/coin.png";
 import handshake from "../assets/icons/handshake.png";
+import avatar from "../assets/icons/avatar.png";
 
 export default {
+  avatar,
   handshake,
   coin,
   bell,

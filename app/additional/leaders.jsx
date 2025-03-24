@@ -12,7 +12,6 @@ const Card = () => {
     const [{ user }, setUser] = useState(useGlobalContext());
     const [leaders, setLeaders] = useState([]);
     const [disLeaders, setDisLeaders] = useState([]);
-    const [names, setNames] = useState([]);
     const [tab, setTab] = useState(0);
     const navigation = useNavigation();
 
@@ -36,7 +35,6 @@ const Card = () => {
 
                 // Получаем пользователей по ID
                 const users = await getUsersByIds(userIdsList);
-                setNames(users);
 
                 // Объединяем лидеров с именами и обновляем state
                 const updatedLeaders = addNamesToObjects(leadersByTime, users);
@@ -85,7 +83,12 @@ const Card = () => {
     const addNamesToObjects = (objects, names) => {
         return objects.map((obj, index) => ({
             ...obj,
-            name: names[index] || 'имя неизвестно',
+            name: names[index].name || 'имя неизвестно',
+            imageUrl: names[index].imageUrl || '',
+            username: names[index].username || 'unknown',
+            rank: names[index].rank || 1,
+            exp: names[index].exp || 0,
+            bio: names[index].bio || '',
         }));
     };
 

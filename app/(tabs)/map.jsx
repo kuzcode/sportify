@@ -357,20 +357,22 @@ const App = () => {
 
       {sending && (
         <View className="left-[10vw] right-[10vw] bottom-[31vh] absolute bg-[#222] z-20 py-3 px-4 rounded-3xl">
-          <TouchableOpacity
-            onPress={() => {
-              setSending(false);
-            }}
-            className="bg-[#333] p-1 rounded-full absolute right-2 top-2"
-          >
-            <Image
-              source={icons.close}
-              tintColor={'#fff'}
-              className="w-6 h-6"
-            />
-          </TouchableOpacity>
+          <View className="flex flex-row">
+            <TouchableOpacity
+              onPress={() => {
+                setSending(false);
+              }}
+              className="bg-[#333] p-1 rounded-full absolute right-0 top-0"
+            >
+              <Image
+                source={icons.close}
+                tintColor={'#fff'}
+                className="w-6 h-6"
+              />
+            </TouchableOpacity>
 
-          <Text className="text-white text-[18px] font-pregular">отправь другу</Text>
+            <Text className="text-white text-[18px] font-pregular">отправь другу</Text>
+          </View>
           {friends.length > 0 ? (
             <View>
               <ScrollView
@@ -452,20 +454,9 @@ const App = () => {
           <View className="flex flex-row absolute top-4 items-center justify-between left-4 right-4">
             <TouchableOpacity
               onPress={() => {
-              }}
-              className="bg-[#111] w-[14%] py-[10px] rounded-2xl flex justify-center items-center">
-              <Image
-                source={icons.dots}
-                className="w-6 h-6"
-                tintColor={'#fff'}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
                 setSending(true);
               }}
-              className={`bg-[#111] w-[67%] py-2 rounded-2xl`}>
+              className={`bg-[#111] w-[82%] py-2 rounded-2xl`}>
               <Text
                 className={`text-white text-[19px] font-pregular text-center`}>отправить</Text>
             </TouchableOpacity>
@@ -474,7 +465,7 @@ const App = () => {
               onPress={() => {
                 setRouteClicked(false);
               }}
-              className="w-[14%] bg-[#111] flex justify-center items-center rounded-2xl py-[10px]">
+              className="w-[15%] bg-[#111] flex justify-center items-center rounded-2xl py-[10px]">
               <Image
                 source={icons.close}
                 className="w-6 h-6"

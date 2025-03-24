@@ -30,7 +30,7 @@ const Create = () => {
     })
 
     return (
-        <ScrollView className="bg-[#000] pt-10 px-4">
+        <ScrollView className="bg-[#111] pt-10 px-4">
             <Text className="text-white font-pbold text-[21px]">заявка на совместную тренировку</Text>
             <Text className="text-[#838383] font-pregular text-[20px] mb-4">она появится в списке и любой сможет откликнуться</Text>
 
@@ -47,6 +47,8 @@ const Create = () => {
                 value={form.description}
                 handleChangeText={(e) => setForm({ ...form, description: e })}
                 otherStyles="mt-4"
+                multiline={true}
+                numberOfStrokes={4}
                 max={2000}
             />
 
@@ -56,6 +58,7 @@ const Create = () => {
                 handleChangeText={(e) => setForm({ ...form, place: e })}
                 otherStyles="mt-4"
                 multiline={true}
+                numberOfStrokes={2}
                 max={100}
             />
 
@@ -65,6 +68,7 @@ const Create = () => {
                 handleChangeText={(e) => setForm({ ...form, contact: e })}
                 otherStyles="mt-4"
                 multiline={true}
+                numberOfStrokes={2}
                 max={100}
             />
 
@@ -75,6 +79,8 @@ const Create = () => {
             }} className="bg-[#fff] mt-4 mb-10 rounded-2xl py-3">
                 <Text className="font-pregular text-[20px] text-center">сохранить</Text>
             </TouchableOpacity>
+
+            <View className="mt-[10vh]"></View>
         </ScrollView>
     )
 }

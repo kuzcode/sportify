@@ -29,12 +29,12 @@ const Welcome = () => {
 
           <View className="relative mt-5 w-[100vw] px-4">
             <Text className="text-3xl font-pbold text-left text-[#fff]">
-              <Text className="text-[#3c87ff]">атлет</Text> - ваш спорт в Беларуси
+              <Text className="text-[#3c87ff]">атлет</Text> - твой спорт в Беларуси
             </Text>
 
-          <Text className="text-[18px] font-pregular text-[#838383] mt-4 text-left">
-            совместные тренировкии, новые знакомства, советы по питанию!
-          </Text>
+            <Text className="text-[18px] font-pregular text-[#838383] mt-4 text-left">
+              это бета-версия приложения. могут быть ошибки, которые мы скоро исправим
+            </Text>
           </View>
 
 

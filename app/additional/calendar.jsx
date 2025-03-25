@@ -7,7 +7,7 @@ import { FormField } from '../../components';
 import { exercises } from '../../constants/exercises';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment'; // Для работы с датами
-import dayjs from 'dayjs';
+import { router } from 'expo-router';
 
 
 const Calendar = () => {
@@ -396,7 +396,11 @@ const Calendar = () => {
                     <TouchableOpacity onPress={() => { setPlanningShown(true) }} className="border-b-2 border-b-[#333] pb-2 mb-1">
                         <Text className="text-white text-[19px] font-pregular text-right">запланировать</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity className="border-b-2 border-b-[#333] pb-2 mb-1">
+                    <TouchableOpacity
+                        onPress={() => {
+                            router.push('/additional/programms')
+                        }}
+                        className="mb-1">
                         <Text className="text-white text-[19px] font-pregular text-right">программы тренировок</Text>
                     </TouchableOpacity>
                 </View>

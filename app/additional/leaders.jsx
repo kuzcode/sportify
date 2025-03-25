@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View, Image } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import useAppwrite from "../../lib/useAppwrite";
 import { getTopUsersByTime, getUsersByIds, getTopUsersByDis } from "../../lib/appwrite";
@@ -61,7 +61,6 @@ const Card = () => {
 
                 // Получаем пользователей по ID
                 const users = await getUsersByIds(userIdsList);
-                setNames(users);
 
                 // Объединяем лидеров с именами и обновляем state
                 const updatedLeaders = addNamesToObjects(leadersByDis, users);
@@ -111,6 +110,15 @@ const Card = () => {
 
             {tab === 0 && (
                 <View>
+                    {leaders.length === 0 && (
+                        <ActivityIndicator
+                            animating={true}
+                            color="#fff"
+                            size={50}
+                            className="mt-10"
+                        />
+                    )}
+
                     {leaders.map((leader, index) => {
                         if (index === 0) {
                             return (
@@ -127,7 +135,9 @@ const Card = () => {
                         }
                         else if (index === 1) {
                             return (
-                                <TouchableOpacity key={leader} className="bg-[#f3f9ff32] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
+                                <TouchableOpacity onPress={() => {
+                                    navigation.navigate('otherProfile', leader) // переходим на экран Bookmark
+                                }} key={leader} className="bg-[#f3f9ff32] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
                                     <Text className="text-[30px] font-pbold relative ml-4 text-[#fafcffd3]">2</Text>
                                     <View>
                                         <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
@@ -138,7 +148,9 @@ const Card = () => {
                         }
                         else if (index === 2) {
                             return (
-                                <TouchableOpacity key={leader} className="bg-[#ff875e32] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
+                                <TouchableOpacity onPress={() => {
+                                    navigation.navigate('otherProfile', leader) // переходим на экран Bookmark
+                                }} key={leader} className="bg-[#ff875e32] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
                                     <Text className="text-[30px] font-pbold relative ml-4 text-[#ffaba8ce]">3</Text>
                                     <View>
                                         <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
@@ -149,7 +161,9 @@ const Card = () => {
                         }
                         else {
                             return (
-                                <TouchableOpacity key={leader} className="bg-[#111] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
+                                <TouchableOpacity onPress={() => {
+                                    navigation.navigate('otherProfile', leader) // переходим на экран Bookmark
+                                }} key={leader} className="bg-[#111] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
                                     <Text className="text-[30px] font-pbold relative ml-4 text-[#838383]">{index + 1}</Text>
                                     <View>
                                         <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
@@ -163,56 +177,78 @@ const Card = () => {
             )}
 
             {tab === 1 && (
-                <View>
-                    {disLeaders.map((leader, index) => {
-                        if (index === 0) {
-                            return (
-                                <TouchableOpacity key={leader} className="bg-[#ffb61832] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
-                                    <Text className="text-[30px] font-pbold relative ml-4 text-[#ffdc6a]">1</Text>
-                                    <View>
-                                        <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
-                                        <Text className="text-[19px] font-pregular relative mx-4 text-[#fff2c0a0]">{(leader.totalDis).toFixed(2)}км</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        }
-                        else if (index === 1) {
-                            return (
-                                <TouchableOpacity key={leader} className="bg-[#f3f9ff32] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
-                                    <Text className="text-[30px] font-pbold relative ml-4 text-[#fafcffd3]">2</Text>
-                                    <View>
-                                        <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
-                                        <Text className="text-[19px] font-pregular relative mx-4 text-[#e2f4ffa0]">{(leader.totalDis).toFixed(2)}км</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        }
-                        else if (index === 2) {
-                            return (
-                                <TouchableOpacity key={leader} className="bg-[#ff875e32] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
-                                    <Text className="text-[30px] font-pbold relative ml-4 text-[#ffaba8ce]">3</Text>
-                                    <View>
-                                        <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
-                                        <Text className="text-[19px] font-pregular relative mx-4 text-[#f9cec9a0]">{(leader.totalDis).toFixed(2)}км</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        }
-                        else {
-                            return (
-                                <TouchableOpacity key={leader} className="bg-[#111] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
-                                    <Text className="text-[30px] font-pbold relative ml-4 text-[#838383]">{index + 1}</Text>
-                                    <View>
-                                        <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
-                                        <Text className="text-[19px] font-pregular relative mx-4 text-[#838383]">{(leader.totalDis).toFixed(2)}км</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        }
-                    })}
+                < View >
+                    {
+                        disLeaders.length === 0 && (
+                            <ActivityIndicator
+                                animating={true}
+                                color="#fff"
+                                size={50}
+                                className="mt-10"
+                            />
+                        )
+                    }
+
+                    {
+                        disLeaders.map((leader, index) => {
+                            if (index === 0) {
+                                return (
+                                    <TouchableOpacity onPress={() => {
+                                        navigation.navigate('otherProfile', leader) // переходим на экран Bookmark
+                                    }} key={leader} className="bg-[#ffb61832] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
+                                        <Text className="text-[30px] font-pbold relative ml-4 text-[#ffdc6a]">1</Text>
+                                        <View>
+                                            <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
+                                            <Text className="text-[19px] font-pregular relative mx-4 text-[#fff2c0a0]">{(leader.totalDis).toFixed(2)}км</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            }
+                            else if (index === 1) {
+                                return (
+                                    <TouchableOpacity onPress={() => {
+                                        navigation.navigate('otherProfile', leader) // переходим на экран Bookmark
+                                    }} key={leader} className="bg-[#f3f9ff32] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
+                                        <Text className="text-[30px] font-pbold relative ml-4 text-[#fafcffd3]">2</Text>
+                                        <View>
+                                            <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
+                                            <Text className="text-[19px] font-pregular relative mx-4 text-[#e2f4ffa0]">{(leader.totalDis).toFixed(2)}км</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            }
+                            else if (index === 2) {
+                                return (
+                                    <TouchableOpacity onPress={() => {
+                                        navigation.navigate('otherProfile', leader) // переходим на экран Bookmark
+                                    }} key={leader} className="bg-[#ff875e32] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
+                                        <Text className="text-[30px] font-pbold relative ml-4 text-[#ffaba8ce]">3</Text>
+                                        <View>
+                                            <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
+                                            <Text className="text-[19px] font-pregular relative mx-4 text-[#f9cec9a0]">{(leader.totalDis).toFixed(2)}км</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            }
+                            else {
+                                return (
+                                    <TouchableOpacity onPress={() => {
+                                        navigation.navigate('otherProfile', leader) // переходим на экран Bookmark
+                                    }} key={leader} className="bg-[#111] py-4 mx-4 mt-4 rounded-3xl flex flex-row items-center">
+                                        <Text className="text-[30px] font-pbold relative ml-4 text-[#838383]">{index + 1}</Text>
+                                        <View>
+                                            <Text className="text-[21px] font-pbold relative mx-4 text-[#fff]">{leader.name}</Text>
+                                            <Text className="text-[19px] font-pregular relative mx-4 text-[#838383]">{(leader.totalDis).toFixed(2)}км</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            }
+                        })
+                    }
                 </View>
-            )}
-        </ScrollView>
+            )
+            }
+        </ScrollView >
     )
 }
 

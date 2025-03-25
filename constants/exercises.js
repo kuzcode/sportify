@@ -249,7 +249,7 @@ export const datas = [
         exType: 0, //weekly
         days: [{
             day: 1, //monday
-            icon: 'muscles',
+            icon: 'kettlebell',
             title: 'день груди, спины и ног',
             ex: [{
                 ind: 9,
@@ -337,7 +337,7 @@ export const datas = [
         },
         {
             day: 3, //monday
-            icon: 'muscles',
+            icon: 'kettlebell',
             title: 'день груди, спины и ног',
             ex: [{
                 ind: 9,
@@ -425,7 +425,7 @@ export const datas = [
         },
         {
             day: 5, //monday
-            icon: 'muscles',
+            icon: 'kettlebell',
             title: 'день груди, спины и ног',
             ex: [{
                 ind: 9,

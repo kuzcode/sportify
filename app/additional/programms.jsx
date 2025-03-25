@@ -15,6 +15,8 @@ const Programms = () => {
     const [currentpr, setCurrentpr] = useState({});
     const [calendar, setCalendar] = useState({});
     const [often, setOften] = useState(0);
+    const [minOften, setMinOften] = useState(0);
+    const [maxOften, setMaxOften] = useState(999);
 
     useEffect(() => {
         const fetchCalendar = async () => {
@@ -68,7 +70,7 @@ const Programms = () => {
     }
 
     const setProgramm = () => {
-        if (calendar.repeaten.some(obj => obj.type === 10)) {
+        if (calendar.repeaten?.some(obj => obj.type === 10)) {
             setAlShown(true);
         }
         else {
@@ -99,13 +101,13 @@ const Programms = () => {
 
                 <Text className='text-[#fff] font-pbold text-[19px] text-left mx-4 mt-4 leading-[21px] mb-2'>частота</Text>
                 <View className="mx-4 flex flex-row justify-between">
-                    <TouchableOpacity onPress={() => { setOften(0) }} className={`${often === 0 ? 'bg-white' : 'bg-[#111]'} w-[32%] rounded-2xl py-2`}>
+                    <TouchableOpacity onPress={() => { setMinOften(0); setMaxOften(999); setOften(0) }} className={`${often === 0 ? 'bg-white' : 'bg-[#111]'} w-[32%] rounded-2xl py-2`}>
                         <Text className={`${often === 0 ? 'text-black' : 'text-[#fff]'} font-pregular text-[17px] text-center mx-4 leading-[21px]`}>все</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { setOften(1) }} className={`${often === 1 ? 'bg-white' : 'bg-[#111]'} w-[32%] rounded-2xl py-2`}>
+                    <TouchableOpacity onPress={() => { setMinOften(0); setMaxOften(3); setOften(1) }} className={`${often === 1 ? 'bg-white' : 'bg-[#111]'} w-[32%] rounded-2xl py-2`}>
                         <Text className={`${often === 1 ? 'text-black' : 'text-[#fff]'} font-pregular text-[17px] text-center mx-4 leading-[21px]`}>редко</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => { setOften(2) }} className={`${often === 2 ? 'bg-white' : 'bg-[#111]'} w-[32%] rounded-2xl py-2`}>
+                    <TouchableOpacity onPress={() => { setMinOften(2); setMaxOften(7); setOften(2) }} className={`${often === 2 ? 'bg-white' : 'bg-[#111]'} w-[32%] rounded-2xl py-2`}>
                         <Text className={`${often === 2 ? 'text-black' : 'text-[#fff]'} font-pregular text-[17px] text-center mx-4 leading-[21px]`}>часто</Text>
                     </TouchableOpacity>
                 </View>
@@ -224,19 +226,23 @@ const Programms = () => {
             </View>
 
             {datas.map(item =>
-                <TouchableOpacity className="bg-[#111] mx-4 rounded-3xl px-4 py-4 mt-4"
-                    onPress={() => { handleprog(item) }}
-                >
-                    <View className="flex flex-row w-[100%] justify-between">
-                        <Image
-                            source={{ uri: item.img }}
-                            className="w-[80px] h-[80px] rounded-xl mr-2 absolute"
-                        />
-                        <Text className="text-white font-pbold text-[20px] leading-[24px] text-right w-full">{item.name}</Text>
-                    </View>
-                    <Text className="text-[#838383] font-pregular text-[18px] text-right ml-[90px]">{item.desc}, <Text className="text-[#75bff8]">{item.type}</Text></Text>
+                <View>
+                    {item.days.length < maxOften && item.days.length > minOften && (
+                        <TouchableOpacity className="bg-[#111] mx-4 rounded-3xl px-4 py-4 mt-4"
+                            onPress={() => { handleprog(item) }}
+                        >
+                            <View className="flex flex-row w-[100%] justify-between">
+                                <Image
+                                    source={{ uri: item.img }}
+                                    className="w-[80px] h-[80px] rounded-xl mr-2 absolute"
+                                />
+                                <Text className="text-white font-pbold text-[20px] leading-[24px] text-right w-full">{item.name}</Text>
+                            </View>
+                            <Text className="text-[#838383] font-pregular text-[18px] text-right ml-[90px]">{item.desc}, <Text className="text-[#75bff8]">{item.type}</Text></Text>
 
-                </TouchableOpacity>
+                        </TouchableOpacity>
+                    )}
+                </View>
             )}
         </ScrollView></>
     )

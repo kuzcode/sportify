@@ -2639,13 +2639,6 @@
   resolved "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-11.1.0.tgz"
   integrity sha512-pIbCuqgrY7SkngAcjUs9fMzNh1h4soQMVw1IeGp1HN5//wox3fUVOuvyIubTscUbdLFKiltJAiuQek7Nhx1bqA==
 
-"@react-native-community/push-notification-ios@^1.10.1":
-  version "1.11.0"
-  resolved "https://registry.npmjs.org/@react-native-community/push-notification-ios/-/push-notification-ios-1.11.0.tgz"
-  integrity sha512-nfkUs8P2FeydOCR4r7BNmtGxAxI22YuGP6RmqWt6c8EEMUpqvIhNKWkRSFF3pHjkgJk2tpRb9wQhbezsqTyBvA==
-  dependencies:
-    invariant "^2.2.4"
-
 "@react-native-community/slider@^4.5.6":
   version "4.5.6"
   resolved "https://registry.npmjs.org/@react-native-community/slider/-/slider-4.5.6.tgz"
@@ -8837,18 +8830,6 @@ react-native-appwrite@^0.2.2:
     expo-file-system "16.0.8"
     react-native "^0.73.6"
 
-react-native-background-fetch@~4.2.6:
-  version "4.2.7"
-  resolved "https://registry.npmjs.org/react-native-background-fetch/-/react-native-background-fetch-4.2.7.tgz"
-  integrity sha512-lR8MmQRjd7MV9KBSOsyxFRW7jeCjNOSvsT4PECwZv54iZZtxUkRjH8Kbr6SGiSPK1AmYM6TCdRBEt2I9FDZJEg==
-
-react-native-background-geolocation@^4.18.6:
-  version "4.18.6"
-  resolved "https://registry.npmjs.org/react-native-background-geolocation/-/react-native-background-geolocation-4.18.6.tgz"
-  integrity sha512-45wgsO9D6fZxWNB+RMctVOgluTfj5ktCL8mVXapxnLcIlNHoKYVFVxaJj45AcVzPYTHIxsnwn9LP/+gJydkFGA==
-  dependencies:
-    react-native-background-fetch "~4.2.6"
-
 react-native-calendars@^1.1308.1:
   version "1.1308.1"
   resolved "https://registry.npmjs.org/react-native-calendars/-/react-native-calendars-1.1308.1.tgz"
@@ -8901,12 +8882,7 @@ react-native-maps@^1.10.0:
   dependencies:
     "@types/geojson" "^7946.0.13"
 
-react-native-push-notification@^8.1.1:
-  version "8.1.1"
-  resolved "https://registry.npmjs.org/react-native-push-notification/-/react-native-push-notification-8.1.1.tgz"
-  integrity sha512-XpBtG/w+a6WXTxu6l1dNYyTiHnbgnvjoc3KxPTxYkaIABRmvuJZkFxqruyGvfCw7ELAlZEAJO+dthdTabCe1XA==
-
-react-native-reanimated@*, react-native-reanimated@~3.6.2:
+react-native-reanimated@*:
   version "3.6.3"
   resolved "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-3.6.3.tgz"
   integrity sha512-2KkkPozoIvDbJcHuf8qeyoLROXQxizSi+2CTCkuNVkVZOxxY4B0Omvgq61aOQhSZUh/649x1YHoAaTyGMGDJUw==
@@ -8962,7 +8938,7 @@ react-native-widgetkit@^1.0.9:
   resolved "https://registry.npmjs.org/react-native-widgetkit/-/react-native-widgetkit-1.0.9.tgz"
   integrity sha512-WBwdUbcOzyL0LiqhRyd7gS9A1D0X5A/m2h0fAKTbxUAbp3r2D2pdjyPnVW/6q0otpq7RIyZFo6Ln1EDJ9gfhEg==
 
-react-native@*, "react-native@^0.0.0-0 || >=0.60 <1.0", "react-native@>= 0.30.0", "react-native@>= 0.50.0", "react-native@>= 0.64.3", react-native@>=0.33, react-native@>=0.58.4, react-native@>=0.59, react-native@0.73.6:
+react-native@*, "react-native@^0.0.0-0 || >=0.60 <1.0", "react-native@>= 0.30.0", "react-native@>= 0.50.0", "react-native@>= 0.64.3", react-native@>=0.59, react-native@0.73.6:
   version "0.73.6"
   resolved "https://registry.npmjs.org/react-native/-/react-native-0.73.6.tgz"
   integrity sha512-oqmZe8D2/VolIzSPZw+oUd6j/bEmeRHwsLn1xLA5wllEYsZ5zNuMsDus235ONOnCRwexqof/J3aztyQswSmiaA==
@@ -9076,7 +9052,7 @@ react-shallow-renderer@^16.15.0:
     object-assign "^4.1.1"
     react-is "^16.12.0 || ^17.0.0 || ^18.0.0"
 
-react@*, "react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.6.0 || ^17.0.0 || ^18.0.0", "react@^16.8 || ^17.0 || ^18.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^17.0.0 || ^18.0.0 || ^19.0.0", react@^18.0, "react@> 16.7.0", "react@>= 15.2.1", "react@>= 17.0.1", react@>=16.6.3, react@>=16.8, react@>=17.0.0, react@18.2.0:
+react@*, "react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.6.0 || ^17.0.0 || ^18.0.0", "react@^16.8 || ^17.0 || ^18.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", "react@^17.0.0 || ^18.0.0 || ^19.0.0", react@^18.0, "react@> 16.7.0", "react@>= 15.2.1", "react@>= 17.0.1", react@>=16.8, react@>=17.0.0, react@18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==

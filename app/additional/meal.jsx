@@ -13,7 +13,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { colors, meal } from "../../constants/types";
 import { FormField } from "../../components";
 import { Dropdown } from "react-native-element-dropdown";
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, runOnJS } from 'react-native-reanimated';
 import { getUserMeal } from "../../lib/appwrite";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import icons from "../../constants";

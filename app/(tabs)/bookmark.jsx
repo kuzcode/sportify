@@ -5,7 +5,6 @@ import WebView from 'react-native-webview';
 import * as Location from 'expo-location';
 import { rank, types } from '../../constants/types';
 import { saveCompleted, setCoins, setExp } from '../../lib/appwrite';
-import PushNotification from 'react-native-push-notification';
 import { LinearGradient } from 'expo-linear-gradient';
 import { exercises, oneProgram, swimmingExs } from '../../constants/exercises'
 import { icons } from '../../constants';
@@ -1175,9 +1174,9 @@ const Bookmark = () => {
                   <View className="flex-1 items-center justify-center">
                     <Slider
                       style={{ width: width - 40, height: 40 }}
-                      value={val}
+                      value={effort}
                       className=""
-                      onValueChange={(value) => setEffort(value)}
+                      onValueChange={(hehe) => setEffort(hehe)}
                       minimumValue={0}
                       maximumValue={10}
                       step={1}

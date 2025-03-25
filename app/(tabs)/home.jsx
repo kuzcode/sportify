@@ -163,7 +163,7 @@ const Home = () => {
         const shuffledData = allData.sort(() => Math.random() - 0.5);
 
         if (shuffledData.length < 5) {
-          const recTr = await getRecommendedTrainings();
+          const recTr = await getRecommendedTrainings(0);
           const enrichedRecTrainings = await Promise.all(recTr.map(async (item) => {
             const user = await getUserById(item.userId);
             return { ...item, name: user.documents[0].name, imageUrl: user.documents[0].imageUrl, from: 0, recommended: true };
@@ -286,10 +286,10 @@ const Home = () => {
   useEffect(() => {
     const fetchQuotes = async () => {
       try {
-        const quotes = await getAllQuotes(user?.$id);
+        const quotes = await getAllQuotes(user.$id);
         setMotivation(quotes);
 
-        motivation.map(a => {
+        quotes.map(a => {
           if (a.isLikedByUser == true) {
             setLikedQuotes(
               [...likedQuotes, a.id]
@@ -300,10 +300,8 @@ const Home = () => {
       }
     };
 
-    if (user) {
-      fetchQuotes();
-    }
-  }, [user]);
+    fetchQuotes();
+  }, []);
 
   useEffect(() => {
     const fetchCalendar = async () => {
@@ -420,7 +418,7 @@ const Home = () => {
     const offsetY = event.nativeEvent.contentOffset.y;
 
     // Проверяем, если offsetY больше последнего триггера на 600
-    if (offsetY >= lastTriggeredOffset + 650) {
+    if (offsetY >= lastTriggeredOffset + 600) {
       setLastTriggeredOffset(offsetY); // Обновляем значение lastTriggeredOffset
 
       // Запускаем процесс
@@ -428,6 +426,10 @@ const Home = () => {
       console.log(totalCount + 1); // Логируем новое значение
 
       const gotNewRec = await getRecommendedTrainings(totalCount + 1);
+
+      // Используем Set для хранения уже добавленных $id
+      const existingIds = new Set(combinedData.map(item => item.$id)); // Существующие $id из combinedData
+
       const enrichedRecTrainings = await Promise.all(gotNewRec.map(async (item) => {
         const user = await getUserById(item.userId);
         return {
@@ -439,7 +441,13 @@ const Home = () => {
         };
       }));
 
-      setCombinedData(prevData => [...prevData, ...enrichedRecTrainings]);
+      // Фильтруем новые данные, чтобы исключить дубли
+      const uniqueTrainings = enrichedRecTrainings.filter(item => !existingIds.has(item.$id));
+
+      // Добавляем только уникальные данные в combinedData
+      if (uniqueTrainings.length > 0) {
+        setCombinedData(prevData => [...prevData, ...uniqueTrainings]);
+      }
     }
   };
 
@@ -708,11 +716,9 @@ const Home = () => {
               {detail.exercises.length > 0 && (
                 <Text className="text-[#fff] font-pbold text-[20px] mx-4">упражнения:</Text>
               )}
-              {exercises.map(one =>
+              {detail.exercises.map((one, index) =>
                 <View>
-                  {detail.exercises.includes(exercises.indexOf(one)) && (
-                    <Text className="text-[#fff] font-pregular text-[20px] mx-4 mt-1"><Text className="text-[#838383]">{exercises.indexOf(one) + 1}.</Text> {exercises[exercises.indexOf(one)].title}</Text>
-                  )}
+                  <Text className="text-[#fff] font-pregular text-[20px] mx-4 mt-1"><Text className="text-[#838383]">{index + 1}.</Text> {exercises[one].title}</Text>
                 </View>
               )}
             </View>
@@ -772,7 +778,7 @@ const Home = () => {
             </View>
 
             <View>
-              <Text className="text-[16px] leading-[17px] mx-[16px] font-pregular relative text-[#838383] mt-[46px] text-center mb-1">атлет — бета-версия</Text>
+              <Text className="text-[16px] leading-[17px] mx-[16px] font-pregular relative text-[#838383] mt-[46px] text-center mb-1">атлет — первая версия</Text>
               <TouchableOpacity onPress={() => { router.push('/additional/calendar') }} className="flex flex-row justify-center items-center mb-3">
                 <Text className="text-xl font-pbold relative text-[#fff] text-center mb-1">календарь</Text>
                 <Image

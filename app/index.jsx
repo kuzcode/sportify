@@ -40,7 +40,7 @@ const Welcome = () => {
 
           <CustomButton
             title="начать путь"
-            handlePress={() => router.push("/sign-up")}
+            handlePress={() => router.push("/home")}
             containerStyles="w-full mt-7"
           />
         </View>

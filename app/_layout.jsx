@@ -1,14 +1,8 @@
 import { useEffect } from "react";
 import { useFonts } from 'expo-font';
-import NetInfo from '@react-native-community/netinfo';
 import { Stack, router } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'react-native';
 import GlobalProvider from "../context/GlobalProvider";
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-StatusBar.setHidden(true);
 
 const RootLayout = () => {
   const [fontsLoaded, error] = useFonts({

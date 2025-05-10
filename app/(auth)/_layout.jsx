@@ -3,27 +3,13 @@ import { StatusBar } from "expo-status-bar";
 
 import { Loader } from "../../components";
 import { useGlobalContext } from "../../context/GlobalProvider";
-import NetInfo from '@react-native-community/netinfo';
 import { useState, useEffect } from "react";
 
 const AuthLayout = () => {
   const { loading, isLogged } = useGlobalContext();
   const [net, setNet] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      if (!state.isConnected) {
-        setNet(false)
-        router.push('/noNet')
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  if (!loading && net && isLogged) return <Redirect href="/home" />;
+  if (!loading && isLogged) return <Redirect href="/home" />;
 
   return (
     <>

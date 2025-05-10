@@ -13,33 +13,27 @@ const TabIcon = ({ icon, color, name, focused }) => {
         source={icon}
         resizeMode="contain"
         tintColor={color}
-        className="w-6 h-6"
+        className="w-7 h-7"
       />
-      <Text
-        className={`${focused ? "font-psemibold" : "font-pregular"} text-xs`}
-        style={{ color: color }}
-      >
-        {name}
-      </Text>
     </View>
   );
 };
 
 const TabLayout = () => {
   const { loading, isLogged } = useGlobalContext();
-  if (!loading && !isLogged) return <Redirect href="/sign-up" />;
+  //if (!loading && !isLogged) return <Redirect href="/sign-up" />;
 
   return (
     <>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: "#fff",  // #30d158 #248a3d
-          tabBarInactiveTintColor: "#838383",
+          tabBarActiveTintColor: "#000",  // #30d158 #248a3d
+          tabBarInactiveTintColor: "#97a2b0",
           tabBarShowLabel: false,
           tabBarStyle: {
-            backgroundColor: "#000",
+            backgroundColor: "#fff",
             borderTopWidth: 1,
-            borderTopColor: "#000",
+            borderTopColor: "#fff",
             height: 70,
           },
         }}
@@ -53,7 +47,6 @@ const TabLayout = () => {
               <TabIcon
                 icon={icons.home}
                 color={color}
-                name="атлет"
                 focused={focused}
               />
             ),
@@ -68,7 +61,6 @@ const TabLayout = () => {
               <TabIcon
                 icon={icons.plus}
                 color={color}
-                name="карта"
                 focused={focused}
               />
             ),
@@ -83,7 +75,6 @@ const TabLayout = () => {
               <TabIcon
                 icon={icons.bookmark}
                 color={color}
-                name="трекер"
                 focused={focused}
               />
             ),
@@ -98,7 +89,6 @@ const TabLayout = () => {
               <TabIcon
                 icon={icons.neww}
                 color={color}
-                name="клуб"
                 focused={focused}
               />
             ),
@@ -113,7 +103,6 @@ const TabLayout = () => {
               <TabIcon
                 icon={icons.profile}
                 color={color}
-                name="профиль"
                 focused={focused}
               />
             ),

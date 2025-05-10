@@ -12,7 +12,25 @@ const AdditionalLayout = () => {
     <>
       <Stack>
         <Stack.Screen
+          name="today"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="sleep"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="live"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="setValues"
           options={{
             headerShown: false,
           }}

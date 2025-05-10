@@ -40,8 +40,70 @@ import bell from "../assets/icons/bell.png";
 import coin from "../assets/icons/coin.png";
 import handshake from "../assets/icons/handshake.png";
 import avatar from "../assets/icons/avatar.png";
+import edit from "../assets/icons/edit.png";
+import sparkles from "../assets/icons/sparkles.png";
+import bodyback from "../assets/icons/body_back.png";
+import bodybiceps from "../assets/icons/body_biceps.png";
+import bodybreast from "../assets/icons/body_breast.png";
+import bodylegs from "../assets/icons/body_legs.png";
+import filled from "../assets/icons/filled-heart.png";
+import whatsapp from "../assets/icons/whatsapp.png";
+import warning from "../assets/icons/warning.png";
+import delet from "../assets/icons/delete.png";
+import tick from "../assets/icons/tick.png";
+import create from "../assets/icons/create.png";
+
+import queue from "../assets/drawn/queue.png";
+import container from "../assets/drawn/box.png";
+import drill from "../assets/drawn/drill-bit.png";
+import screwdriver from "../assets/drawn/screwdriver.png";
+import shuffle from "../assets/drawn/shuffle.png";
+import spray from "../assets/drawn/spray-gun.png";
+import tool from "../assets/drawn/tool.png";
+import triangular from "../assets/drawn/triangular.png";
+import alert from "../assets/drawn/warning.png";
+import warranty from "../assets/drawn/warranty.png";
+import edge from "../assets/drawn/edge.png";
+import hangar from "../assets/drawn/hangar.png";
+import blade from "../assets/drawn/saw-blade.png";
+import tape from "../assets/drawn/tape.png";
+import delivery from "../assets/drawn/delivery.png";
+import measure from "../assets/drawn/measure.png";
+import phone from "../assets/icons/mobile.png";
 
 export default {
+  create,
+  delet,
+  measure,
+  delivery,
+  tape,
+  queue,
+  container,
+  drill,
+  screwdriver,
+  shuffle,
+  spray,
+  tool,
+  triangular,
+  alert,
+  warranty,
+  edge,
+  hangar,
+  blade,
+
+
+
+  phone,
+  warning,
+  whatsapp,
+  bodylegs,
+  bodyback,
+  bodybiceps,
+  bodybreast,
+  filled,
+  sparkles,
+  edit,
+  tick,
   avatar,
   handshake,
   coin,

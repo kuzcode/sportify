@@ -2,7 +2,7 @@ import { View, Text, Image, TouchableOpacity, ScrollView, RefreshControl, TextIn
 import { useRouter } from "expo-router";
 import { useState, useEffect, useRef } from "react";
 import useAppwrite from "../../lib/useAppwrite";
-import { getUserCompleted, getWeeklyReport, getUserById, updateWeekly, getAwards, getUserAwards, getUserFriends, getAwardsByIds, createPost, getUserPosts, deletePost } from "../../lib/appwrite";
+import { getUserCompleted, getWeeklyReport, getUserById, updateWeekly, getAwards, getUserAwards, getUserFriends, getAwardsByIds, createPost, getUserPosts, deletePost, getUserValues } from "../../lib/appwrite";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { rank, types } from "../../constants/types";
 import { icons } from "../../constants";
@@ -25,6 +25,7 @@ const Profile = () => {
   const [userAwards, setUserAwards] = useState([]);
   const [caption, setCaption] = useState('');
   const [tosave, setTosave] = useState(0);
+  const [userValues, setUserValues] = useState([]);
   const [detail, setDetail] = useState({});
   const [detailShown, setDetailShown] = useState(false);
   const [postShown, setPostShown] = useState(false);
@@ -85,6 +86,19 @@ const Profile = () => {
         setAwards(got)
       } catch (error) {
         console.error('Error fetching awards: ', error);
+      }
+    }
+
+    fetchAwards();
+  }, [user])
+
+  useEffect(() => {
+    async function fetchAwards() {
+      try {
+        const got = await getUserValues(user.$id);
+        setUserValues(got[0])
+      } catch (error) {
+        console.error('Error fetching values: ', error);
       }
     }
 
@@ -326,6 +340,29 @@ const Profile = () => {
 
   const filteredList = types.filter(item => user?.sports?.includes(item.key));
 
+  const values = [
+    {
+      title: 'жим лёжа',
+      measure: 'кг'
+    },
+    {
+      title: 'становая тяга',
+      measure: 'кг'
+    },
+    {
+      title: 'присед',
+      measure: 'кг'
+    },
+    {
+      title: 'на бицепс',
+      measure: 'кг'
+    },
+    {
+      title: '1000м',
+      measure: 'сек'
+    },
+  ]
+
   return (
     <ScrollView className="bg-[#000] h-full"
       refreshControl={
@@ -355,7 +392,6 @@ const Profile = () => {
               </TouchableOpacity>
             </View>
           )}
-
 
           <TouchableOpacity className="absolute right-[16px] top-0 z-20" onPress={() => { setPostShown(false) }}>
             <Image
@@ -436,6 +472,17 @@ const Profile = () => {
               )}
             </View>
           )}
+
+          <TouchableOpacity className="bg-[#111] mt-4 mx-4 pt-2 pb-3 px-4 rounded-2xl"
+            onPress={() => { setAlShown(true) }}
+          >
+            <Text className="text-[#fff] font-pregular text-[18px] text-center">редактировать</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="bg-[#240a0a] mt-4 mx-4 pt-2 pb-3 px-4 rounded-2xl"
+            onPress={() => { setAlShown(true) }}
+          >
+            <Text className="text-[#FF7E7E] font-pregular text-[18px] text-center">удалить тренировку</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -623,6 +670,31 @@ const Profile = () => {
               </View>
             </TouchableOpacity>
           </View>
+
+          {userValues.stats.length > 0 && (
+            <View>
+              <TouchableOpacity
+                onPress={() => { router.push('/additional/setValues') }}
+                className="flex flex-row items-center mb-4">
+                <Text className="text-[#838383] font-pregular text-[20px] ml-4 mr-2">личные рекорды</Text>
+                <View className="bg-[#111] p-2 rounded-[8px]">
+                  <Image
+                    source={icons.edit}
+                    className="w-4 h-4"
+                    tintColor={'#838383'}
+                  />
+                </View>
+              </TouchableOpacity>
+              <View className="mb-4 mx-4 flex flex-row flex-wrap justify-between">
+                {userValues.stats.map(item =>
+                  <TouchableOpacity className={`${userValues.stats.length === 1 ? 'w-full' : `${userValues.stats.length === 2 ? 'w-[48%]' : 'w-[32%]'}`} bg-[#111] px-4 py-3 rounded-2xl`}>
+                    <Text className="text-[#838383] font-pregular text-[20px]">{values[item.index].title}</Text>
+                    <Text className="text-[#fff] font-pbold text-[30px]">{item.value}<Text className="text-[#838383] text-[20px]">{values[item.index].measure}</Text></Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          )}
 
           <TouchableOpacity className="bg-[#111] mx-4 mb-[-16px] px-4 py-3 rounded-t-3xl">
             <Text className="text-[#838383] font-pregular text-[20px]">за 7 дней</Text>

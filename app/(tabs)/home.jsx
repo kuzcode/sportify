@@ -256,6 +256,7 @@ const Home = () => {
             </TouchableOpacity>
           </View>
 
+
           <View className="mb-4">
             <View className="flex-row items-end mb-2">
               <Text className="font-pregular text-[20px] mr-2">Дизайнер</Text>

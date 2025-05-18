@@ -11,6 +11,8 @@ const AuthLayout = () => {
 
   if (!loading && isLogged) return <Redirect href="/home" />;
 
+  console.log(isLogged);
+
   return (
     <>
       <Stack>

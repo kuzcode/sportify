@@ -19,11 +19,11 @@ const FormField = ({
 
   return (
     <View className={`${otherStyles}`}>
-      <Text className="text-[18px] text-[#838383] font-pregular mb-1">{title}</Text>
+      {title && <Text className="text-[18px] text-[#838383] font-pregular mb-1">{title}</Text>}
 
       <View
         style={{
-          height: multiline ? numberOfStrokes * 40 + 16 : 56,
+          height: multiline ? numberOfStrokes * 38 + 12 : 56,
         }}
         className='w-full px-4 bg-light rounded-2xl border-2 border-[#ccd6dd] focus:border-[#3c87ff] flex flex-row items-center'>
         <TextInput

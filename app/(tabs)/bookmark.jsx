@@ -1,14 +1,65 @@
 import { ScrollView, Text, TouchableOpacity, View, TextInput, Image, StyleSheet, Linking, ActivityIndicator } from "react-native";
 import { icons } from "../../constants";
-import { createOrder } from "../../lib/appwrite";
+import { createOrder, getOrders } from "../../lib/appwrite";
 import { useEffect, useState } from "react";
 import { FormField } from "../../components";
 import RNPickerSelect from "react-native-picker-select";
 
 const Create = () => {
   const [form, setForm] = useState({
+    title: '',
+    adress: '',
+    endDate: new Date,
+    payments: [],
+    customer: {
+      name: '',
+      phone: ''
+    },
     modules: []
   });
+
+  // Функция для получения максимального номера модели
+  const getMaxModelNumber = async () => {
+    try {
+      const orders = await getOrders();
+      let maxNumber = 0;
+
+      // Проходим по всем заказам и их модулям
+      orders.forEach(order => {
+        if (order.modules) {
+          order.modules.forEach(module => {
+            if (module.number && module.number > maxNumber) {
+              maxNumber = module.number;
+            }
+          });
+        }
+      });
+
+      return maxNumber;
+    } catch (error) {
+      console.error('Ошибка при получении максимального номера:', error);
+      return 0;
+    }
+  };
+
+  // Функция для добавления новой позиции
+  const addNewModule = async () => {
+    const maxNumber = await getMaxModelNumber();
+    const lastModuleNumber = form.modules.length > 0
+      ? Math.max(...form.modules.map(mod => mod.number))
+      : maxNumber;
+
+    setForm({
+      ...form,
+      modules: [...form.modules, {
+        price: 0,
+        number: lastModuleNumber + 1,
+        bg: 4,
+        icons: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        archived: false,
+      }]
+    });
+  };
 
   return (
     <View className="bg-light w-full h-[100vh]">
@@ -89,8 +140,6 @@ const Create = () => {
             </TouchableOpacity>
           </View>
 
-
-
           <View className="flex-row items-center" style={{ height: 60 }}>
             <Text className="font-pregular text-[20px] mr-2">Прораб</Text>
 
@@ -118,7 +167,6 @@ const Create = () => {
             </TouchableOpacity>
           </View>
 
-
           <FormField
             multiline={true}
             numberOfStrokes={2}
@@ -128,7 +176,7 @@ const Create = () => {
           />
 
           {form.modules.map((mod, index) =>
-            <View className="bg-white p-4 rounded-2xl mt-4 ">
+            <View className="bg-white p-4 rounded-2xl mt-4">
               <View className="flex-row justify-between items-center" key={index}>
                 <FormField
                   title='Название'
@@ -143,7 +191,6 @@ const Create = () => {
                 />
                 <TouchableOpacity
                   onPress={() => {
-                    // Удаление объекта из списка orders.modules
                     const updatedModules = form.modules.filter((_, i) => i !== index);
                     setForm({ ...form, modules: updatedModules });
                   }}
@@ -170,14 +217,7 @@ const Create = () => {
           )}
 
           <TouchableOpacity className="p-4 rounded-2xl bg-white mt-4 mb-[100px]"
-            onPress={() => {
-              setForm({
-                ...form,
-                modules: [...form.modules, {
-                  price: 0
-                }]
-              })
-            }}
+            onPress={addNewModule}
           >
             <Text className="font-pregular text-[20px] text-center">+ Добавить позицию</Text>
           </TouchableOpacity>

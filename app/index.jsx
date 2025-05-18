@@ -12,7 +12,7 @@ const Welcome = () => {
   if (!loading && isLogged) return <Redirect href="/home" />;
 
   return (
-    <SafeAreaView className="bg-[#111] h-full">
+    <SafeAreaView className="bg-light h-full">
       <Loader isLoading={loading} />
 
       <ScrollView
@@ -21,26 +21,20 @@ const Welcome = () => {
         }}
       >
         <View className="w-full flex justify-center items-center h-full px-4">
-          <Image
-            source={images.cards}
-            className="max-w-[380px] w-full h-[298px]"
-            resizeMode="contain"
-          />
-
           <View className="relative mt-5 w-[100vw] px-4">
-            <Text className="text-3xl font-pbold text-left text-[#fff]">
-              <Text className="text-[#3c87ff]">атлет</Text> - твой спорт в Беларуси
+            <Text className="text-3xl font-pbold">
+              <Text className="text-[#3c87ff]">Andreev</Text> - мебель высокого класса
             </Text>
 
             <Text className="text-[18px] font-pregular text-[#838383] mt-4 text-left">
-              это бета-версия приложения. могут быть ошибки, которые мы скоро исправим
+              Приложение для учёта производства. Версия 0.0.1
             </Text>
           </View>
 
 
           <CustomButton
-            title="начать путь"
-            handlePress={() => router.push("/home")}
+            title="войти в аккаунт"
+            handlePress={() => router.push("/sign-up")}
             containerStyles="w-full mt-7"
           />
         </View>

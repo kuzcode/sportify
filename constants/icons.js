@@ -70,8 +70,10 @@ import tape from "../assets/drawn/tape.png";
 import delivery from "../assets/drawn/delivery.png";
 import measure from "../assets/drawn/measure.png";
 import phone from "../assets/icons/mobile.png";
+import hammer from "../assets/icons/hammer.png";
 
 export default {
+  hammer,
   create,
   delet,
   measure,

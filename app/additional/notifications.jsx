@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import mapTemplate from '../map-template';
 import { router } from "expo-router";
 import { ResizeMode, Video } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";

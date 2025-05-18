@@ -53,13 +53,13 @@ const TabLayout = () => {
           }}
         />
         <Tabs.Screen
-          name="map"
+          name="hammer"
           options={{
-            title: "map",
+            title: "Profile",
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
-                icon={icons.plus}
+                icon={icons.hammer}
                 color={color}
                 focused={focused}
               />
@@ -73,7 +73,7 @@ const TabLayout = () => {
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
-                icon={icons.bookmark}
+                icon={icons.create}
                 color={color}
                 focused={focused}
               />
@@ -87,7 +87,7 @@ const TabLayout = () => {
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
-                icon={icons.neww}
+                icon={icons.search}
                 color={color}
                 focused={focused}
               />
@@ -95,13 +95,13 @@ const TabLayout = () => {
           }}
         />
         <Tabs.Screen
-          name="profile"
+          name="map"
           options={{
-            title: "Profile",
+            title: "map",
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
-                icon={icons.profile}
+                icon={icons.neww}
                 color={color}
                 focused={focused}
               />

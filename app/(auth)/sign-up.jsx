@@ -5,7 +5,7 @@ import { View, Text, ScrollView, Dimensions, Alert, TouchableOpacity, Image } fr
 import * as DocumentPicker from "expo-document-picker";
 
 import { images } from "../../constants";
-import { createUser } from "../../lib/appwrite";
+import { createUser, signIn } from "../../lib/appwrite";
 import { CustomButton, FormField } from "../../components";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { types } from "../../constants/types";
@@ -16,20 +16,27 @@ const SignUp = () => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "",
-    email,
+    email: "",
     password: "",
   });
 
   const submit = async () => {
     setSubmitting(true);
     try {
+      // Создаем пользователя
       const result = await createUser(form);
+
+      // Создаем сессию
+      const session = await signIn(form.email, form.password);
+
+      if (!session) throw Error;
+
       setUser(result);
       setIsLogged(true);
 
       router.replace("/home");
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Ошибка", error.message);
     } finally {
       setSubmitting(false);
     }
@@ -45,7 +52,7 @@ const SignUp = () => {
           }}
         >
 
-          <Text className="text-2xl font-semibold mt-0 font-psemibold">
+          <Text className="text-2xl font-pbold">
             Создайте аккаунт
           </Text>
 
@@ -73,20 +80,20 @@ const SignUp = () => {
 
           <CustomButton
             title="Войти"
-            handlePress={next}
+            handlePress={submit}
             containerStyles="mt-4"
             isLoading={isSubmitting}
           />
 
           <View className="flex justify-center pt-5 flex-row gap-2">
             <Text className="text-lg font-pregular">
-              у вас есть аккаунт?
+              У вас есть аккаунт?
             </Text>
             <Link
-              href="/sign-in"
-              className="text-lg font-psemibold text-[#3c87ff]"
+              href="/home"
+              className="text-lg font-pregular text-[#3c87ff]"
             >
-              войдите
+              Войдите
             </Link>
           </View>
         </View>
